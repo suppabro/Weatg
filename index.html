@@ -1,333 +1,117 @@
-<!DOCTYPE html>
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Sri Lanka Weather</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<style>
-        .animated-weather-icon {width: 120px;
-            height: 120px;
-            position: relative;
-        }
-        .animated-weather-icon .sun {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 80px;
-            height: 80px;
-            background: #FFC107;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: spin 10s linear infinite;
-        }
-        .animated-weather-icon .cloud {
-            position: absolute;
-            background: #F4F6F7;
-            border-radius: 20px;
-            animation: move 4s ease-in-out infinite alternate;
-        }
-        .animated-weather-icon .cloud.front {
-            width: 80px;
-            height: 30px;
-            top: 60px;
-            left: 20px;
-            z-index: 2;
-        }
-        .animated-weather-icon .cloud.back {
-            width: 60px;
-            height: 25px;
-            top: 50px;
-            left: 40px;
-            opacity: 0.8;
-            animation-delay: -2s;
-        }
-        @keyframes spin {
-            from {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            to {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-        @keyframes move {
-            from {
-                transform: translateX(-10px);
-            }
-            to {
-                transform: translateX(10px);
-            }
-        }
-        .map-pin {
-            transition: transform 0.2s ease-in-out, fill 0.2s ease-in-out;
-        }
-        .map-pin:hover {
-            transform: scale(1.5);
-            fill: #FFC107;
-        }.toggle-checkbox:checked {
-            right: 0;
-            border-color: #4CAF50;
-        }
-        .toggle-checkbox:checked+.toggle-label {
-            background-color: #4CAF50;
-        }
-    </style>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#4CAF50",
-                        "background-light": "#F4F6F7",
-                        "background-dark": "#0A1931",
-                    },
-                    fontFamily: {
-                        "display": ["Space Grotesk", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-</head>
-<body class="bg-background-light dark:bg-background-dark font-display text-[#B0BEC5]">
-<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-<div class="layout-container flex h-full grow flex-col">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-white/10 px-6 sm:px-10 py-4">
-<div class="flex items-center gap-8">
-<div class="flex items-center gap-4 text-white">
-<div class="text-primary text-2xl">
-<span class="material-symbols-outlined">
-                            thermostat
-                            </span>
-</div>
-<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Sri Lanka Weather</h2>
-</div>
-</div>
-<div class="flex-1 max-w-md mx-8">
-<label class="flex flex-col min-w-40 !h-10 max-w-full">
-<div class="flex w-full flex-1 items-stretch rounded-xl h-full">
-<div class="text-[#B0BEC5] flex border-none bg-black/20 items-center justify-center pl-4 rounded-l-xl border-r-0">
-<span class="material-symbols-outlined">search</span>
-</div>
-<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border-none bg-black/20 focus:border-none h-full placeholder:text-[#B0BEC5] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search for a city..." value=""/>
-</div>
-</label>
-</div>
-<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-black/20 text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
-<div class="text-white">
-<span class="material-symbols-outlined">settings</span>
-</div>
-</button>
-</header>
-<main class="flex-1 flex flex-col lg:flex-row p-6 sm:p-10 gap-6 sm:gap-10">
-<div class="flex flex-col gap-6 sm:gap-10 flex-1">
-<div class="p-6 @container bg-black/10 rounded-xl shadow-lg">
-<div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-<div class="animated-weather-icon">
-<div class="sun"></div>
-<div class="cloud front"></div>
-<div class="cloud back"></div>
-</div>
-<div class="flex flex-1 flex-col items-center sm:items-start justify-center gap-1 text-center sm:text-left">
-<p class="text-white text-4xl sm:text-6xl font-bold leading-tight tracking-[-0.015em]">29°C</p>
-<p class="text-white text-2xl font-medium">Partly Cloudy</p>
-<h3 class="text-primary text-3xl font-bold mt-2">Colombo</h3>
-</div>
-<div class="flex flex-col gap-2 text-center sm:text-left pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-white/10 w-full sm:w-auto px-0 sm:pl-6">
-<p class="text-white text-base font-normal leading-normal">Feels like: <span class="font-bold">32°C</span></p>
-<p class="text-white text-base font-normal leading-normal">Humidity: <span class="font-bold">80%</span></p>
-<p class="text-white text-base font-normal leading-normal">Wind: <span class="font-bold">10km/h</span></p>
-<p class="text-white text-base font-normal leading-normal">UV Index: <span class="font-bold">5</span></p>
-</div>
-</div>
-</div>
-<div class="bg-black/10 rounded-xl p-6">
-<h3 class="text-white text-xl font-bold mb-4">Hourly Forecast (Next 24h)</h3>
-<div class="flex overflow-x-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden pb-4">
-<div class="flex items-stretch gap-4">
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">3 PM</p>
-<div class="text-3xl text-[#FFC107]"><span class="material-symbols-outlined">partly_cloudy_day</span></div>
-<p class="text-white text-lg font-bold">29°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 10%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">4 PM</p>
-<div class="text-3xl text-[#FFC107]"><span class="material-symbols-outlined">partly_cloudy_day</span></div>
-<p class="text-white text-lg font-bold">29°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 15%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">5 PM</p>
-<div class="text-3xl text-white"><span class="material-symbols-outlined">cloudy</span></div>
-<p class="text-white text-lg font-bold">28°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 20%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">6 PM</p>
-<div class="text-3xl text-white"><span class="material-symbols-outlined">rainy</span></div>
-<p class="text-white text-lg font-bold">27°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 40%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">7 PM</p>
-<div class="text-3xl text-white"><span class="material-symbols-outlined">rainy</span></div>
-<p class="text-white text-lg font-bold">27°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 60%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">8 PM</p>
-<div class="text-3xl text-white"><span class="material-symbols-outlined">thunderstorm</span></div>
-<p class="text-white text-lg font-bold">26°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 80%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">9 PM</p>
-<div class="text-3xl text-white/70"><span class="material-symbols-outlined">partly_cloudy_night</span></div>
-<p class="text-white text-lg font-bold">26°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 30%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">10 PM</p>
-<div class="text-3xl text-white/70"><span class="material-symbols-outlined">clear_night</span></div>
-<p class="text-white text-lg font-bold">26°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 10%</div>
-</div>
-<div class="flex flex-col gap-3 rounded-lg min-w-[5rem] p-4 bg-black/20 text-center items-center hover:bg-black/30 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-sm font-medium">11 PM</p>
-<div class="text-3xl text-white/70"><span class="material-symbols-outlined">clear_night</span></div>
-<p class="text-white text-lg font-bold">25°</p>
-<div class="flex items-center gap-1 text-xs text-cyan-400"><span class="material-symbols-outlined !text-sm">water_drop</span> 5%</div>
-</div>
-</div>
-</div>
-</div>
-<div>
-<h3 class="text-white text-xl font-bold mb-4 px-1">5-Day Forecast</h3>
-<div class="flex overflow-x-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&amp;::-webkit-scrollbar]:hidden">
-<div class="flex items-stretch p-1 gap-4">
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Monday</p>
-<div class="text-4xl text-[#FFC107]"><span class="material-symbols-outlined">partly_cloudy_day</span></div>
-<p class="text-white text-lg font-normal leading-normal">30° / 26°</p>
-</div>
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Tuesday</p>
-<div class="text-4xl text-white"><span class="material-symbols-outlined">rainy</span></div>
-<p class="text-white text-lg font-normal leading-normal">29° / 25°</p>
-</div>
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Wednesday</p>
-<div class="text-4xl text-[#FFC107]"><span class="material-symbols-outlined">sunny</span></div>
-<p class="text-white text-lg font-normal leading-normal">31° / 27°</p>
-</div>
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Thursday</p>
-<div class="text-4xl text-white"><span class="material-symbols-outlined">thunderstorm</span></div>
-<p class="text-white text-lg font-normal leading-normal">28° / 24°</p>
-</div>
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Friday</p>
-<div class="text-4xl text-[#FFC107]"><span class="material-symbols-outlined">sunny</span></div>
-<p class="text-white text-lg font-normal leading-normal">32° / 28°</p>
-</div>
-<div class="flex h-full flex-1 flex-col gap-3 rounded-lg min-w-36 p-4 bg-black/10 text-center items-center hover:bg-black/20 transition-colors duration-300 cursor-pointer">
-<p class="text-white text-base font-medium leading-normal">Saturday</p>
-<div class="text-4xl text-white"><span class="material-symbols-outlined">cloudy</span></div>
-<p class="text-white text-lg font-normal leading-normal">30° / 27°</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-black/10 rounded-xl p-6">
-<h3 class="text-white text-xl font-bold mb-4">Daily Weather Notifications</h3>
-<div class="flex flex-col gap-4">
-<div class="flex items-center justify-between">
-<label class="text-white font-medium" for="notifications-toggle">Enable Notifications</label>
-<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="notifications-toggle" name="toggle" type="checkbox"/>
-<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="notifications-toggle"></label>
-</div>
-</div>
-<div class="flex items-center justify-between">
-<label class="text-white font-medium" for="notification-time">Notification Time</label>
-<input class="form-input bg-black/20 border-none text-white rounded-md w-32" id="notification-time" type="time" value="08:00"/>
-</div>
-<div>
-<h4 class="text-white font-medium mb-2">Location Alerts</h4>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-<div class="flex items-center gap-2">
-<input checked="" class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-colombo" type="checkbox"/>
-<label class="text-white" for="loc-colombo">Colombo</label>
-</div>
-<div class="flex items-center gap-2">
-<input checked="" class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-kandy" type="checkbox"/>
-<label class="text-white" for="loc-kandy">Kandy</label>
-</div>
-<div class="flex items-center gap-2">
-<input class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-galle" type="checkbox"/>
-<label class="text-white" for="loc-galle">Galle</label>
-</div>
-<div class="flex items-center gap-2">
-<input class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-jaffna" type="checkbox"/>
-<label class="text-white" for="loc-jaffna">Jaffna</label>
-</div>
-<div class="flex items-center gap-2">
-<input class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-nuwara" type="checkbox"/>
-<label class="text-white" for="loc-nuwara">Nuwara Eliya</label>
-</div>
-<div class="flex items-center gap-2">
-<input class="form-checkbox bg-black/20 border-white/20 text-primary focus:ring-primary" id="loc-trinco" type="checkbox"/>
-<label class="text-white" for="loc-trinco">Trincomalee</label>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<aside class="w-full lg:w-1/3 flex flex-col gap-6">
-<div class="bg-black/10 rounded-xl p-4 flex-1 flex flex-col">
-<h3 class="text-white text-xl font-bold mb-4">Locations</h3>
-<div class="w-full flex-1 flex items-center justify-center" data-alt="Stylized vector map of Sri Lanka">
-<svg class="w-full h-full object-contain" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
-<path d="M125.2,1.3c-2.4-0.8-5.3-0.7-7.8,0.2c-12.8,4.7-20.9,13.8-26,26.1c-4.9,12-7.8,24.8-10.4,37.5 C79.6,71.2,78,77.5,76,83.7c-4.4,13.7-8,27.7-12.7,41.2c-4.8,13.7-10.4,27-16.1,40.3c-2.5,5.9-5,11.8-6.8,17.9 c-1.6,5.3-2.6,10.8-2,16.3c1.3,12.3,10.2,21.7,21.3,25.6c13.7,4.8,27.7,6.4,41.8,6.2c12.3-0.1,24.5-1.9,36.5-5.3 c13.4-3.7,25.4-10.7,33.1-22.3c6.1-9.3,8.7-20.3,9.5-31.3c0.7-9.4,0.1-18.9-1.9-28.1c-2.6-12.3-7.4-23.9-13.2-34.9 c-7.3-13.8-16.3-26.6-25-39.6c-4-6-7.8-12-11.2-18.3c-7.9-14.8-14.2-30.5-18.7-46.4C128.9,4.4,127.3,2,125.2,1.3z" fill="#1A2A47" stroke="#4CAF50" stroke-width="1.5"></path>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="100" cy="230" data-location="Colombo" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="105" y="234">Colombo</text>
-</g>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="120" cy="180" data-location="Kandy" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="125" y="184">Kandy</text>
-</g>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="95" cy="270" data-location="Galle" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="100" y="274">Galle</text>
-</g>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="105" cy="40" data-location="Jaffna" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="110" y="44">Jaffna</text>
-</g>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="140" cy="210" data-location="Nuwara Eliya" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="145" y="214">Nuwara Eliya</text>
-</g>
-<g class="cursor-pointer group">
-<circle class="map-pin" cx="150" cy="130" data-location="Trincomalee" fill="#B0BEC5" r="4"></circle>
-<text class="opacity-0 group-hover:opacity-100 transition-opacity" fill="white" font-size="8" x="155" y="134">Trincomalee</text>
-</g>
-</svg>
-</div>
-</div>
-</aside>
-</main>
-</div>
-</div>
-</body></html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Space+Grotesk%3Awght%40400%3B500%3B700"
+    />
+
+    <title>Stitch Design</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  </head>
+  <body>
+    <div
+      class="relative flex h-auto min-h-screen w-full flex-col bg-[#111c22] dark justify-between group/design-root overflow-x-hidden"
+      style='font-family: "Space Grotesk", "Noto Sans", sans-serif;'
+    >
+      <div>
+        <div class="flex items-center bg-[#111c22] p-4 pb-2 justify-between">
+          <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pl-12">Weather</h2>
+          <div class="flex w-12 items-center justify-end">
+            <button
+              class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 bg-transparent text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0"
+            >
+              <div class="text-white" data-icon="List" data-size="24px" data-weight="regular">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                  <path
+                    d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"
+                  ></path>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+        <h1 class="text-white tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-3 pt-6">Sunnyvale</h1>
+        <p class="text-white text-base font-normal leading-normal pb-3 pt-1 px-4 text-center">Mostly Clear</p>
+        <div class="flex w-full grow bg-[#111c22] @container p-4">
+          <div class="w-full gap-1 overflow-hidden bg-[#111c22] @[480px]:gap-2 aspect-[3/2] rounded-xl flex">
+            <div
+              class="w-full bg-center bg-no-repeat bg-cover aspect-auto rounded-none flex-1"
+              style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB9jdFYykz73qL55OfX_G5aVO18QMRtIRo1q9Jvahm7xce208D7kDxIVXiF5XS0nwD3COiv4ZiNe9glNaGKcayareQDSo7n1SQRcCyIHCA0pbaTntnpEPXaPDP9ge6Ez8z8x0sToCVIeS7y937c6W6CKiaeEHexIdxkInpXOkGlHZDgKIr9W2wdRVJ1rpVSlngkn03t4gCcJCLCMG9SLaVGnFLA1wEBa6KKz2mmkfbjUMm9oSq0s5IyNMKAu-M8axHUzyhozYKgRm8");'
+            ></div>
+          </div>
+        </div>
+        <h1 class="text-white tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-3 pt-6">22°</h1>
+        <div class="flex items-center gap-4 bg-[#111c22] px-4 min-h-14">
+          <div class="text-white flex items-center justify-center rounded-lg bg-[#233c48] shrink-0 size-10" data-icon="Umbrella" data-size="24px" data-weight="regular">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+              <path
+                d="M240,126.63A112.44,112.44,0,0,0,51.75,53.75a111.56,111.56,0,0,0-35.7,72.88A16,16,0,0,0,32,144h88v56a32,32,0,0,0,64,0,8,8,0,0,0-16,0,16,16,0,0,1-32,0V144h88a16,16,0,0,0,16-17.37ZM32,128l0,0a96.15,96.15,0,0,1,76.2-85.89C96.48,58,81.85,86.11,80.17,128Zm64.15,0c1.39-30.77,10.53-52.81,18.3-66.24A106.44,106.44,0,0,1,128,43.16a106.31,106.31,0,0,1,13.52,18.6C154.8,84.7,159,109.28,159.82,128Zm79.65,0c-1.68-41.89-16.31-70-28-85.94A96.07,96.07,0,0,1,224,128Z"
+              ></path>
+            </svg>
+          </div>
+          <p class="text-white text-base font-normal leading-normal flex-1 truncate">Don't forget your umbrella!</p>
+        </div>
+      </div>
+      <div>
+        <div class="flex gap-2 border-t border-[#233c48] bg-[#192b33] px-4 pb-3 pt-2">
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 rounded-full text-white" href="#">
+            <div class="text-white flex h-8 items-center justify-center" data-icon="Sun" data-size="24px" data-weight="fill">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm8,24a64,64,0,1,0,64,64A64.07,64.07,0,0,0,128,64ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-white text-xs font-medium leading-normal tracking-[0.015em]">Today</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#92b7c9]" href="#">
+            <div class="text-[#92b7c9] flex h-8 items-center justify-center" data-icon="Clock" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#92b7c9] text-xs font-medium leading-normal tracking-[0.015em]">Hourly</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#92b7c9]" href="#">
+            <div class="text-[#92b7c9] flex h-8 items-center justify-center" data-icon="Calendar" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#92b7c9] text-xs font-medium leading-normal tracking-[0.015em]">Daily</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#92b7c9]" href="#">
+            <div class="text-[#92b7c9] flex h-8 items-center justify-center" data-icon="MapTrifold" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M228.92,49.69a8,8,0,0,0-6.86-1.45L160.93,63.52,99.58,32.84a8,8,0,0,0-5.52-.6l-64,16A8,8,0,0,0,24,56V200a8,8,0,0,0,9.94,7.76l61.13-15.28,61.35,30.68A8.15,8.15,0,0,0,160,224a8,8,0,0,0,1.94-.24l64-16A8,8,0,0,0,232,200V56A8,8,0,0,0,228.92,49.69ZM104,52.94l48,24V203.06l-48-24ZM40,62.25l48-12v127.5l-48,12Zm176,131.5-48,12V78.25l48-12Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#92b7c9] text-xs font-medium leading-normal tracking-[0.015em]">Map</p>
+          </a>
+          <a class="just flex flex-1 flex-col items-center justify-end gap-1 text-[#92b7c9]" href="#">
+            <div class="text-[#92b7c9] flex h-8 items-center justify-center" data-icon="Gear" data-size="24px" data-weight="regular">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                <path
+                  d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"
+                ></path>
+              </svg>
+            </div>
+            <p class="text-[#92b7c9] text-xs font-medium leading-normal tracking-[0.015em]">Settings</p>
+          </a>
+        </div>
+        <div class="h-5 bg-[#192b33]"></div>
+      </div>
+    </div>
+  </body>
+</html>
