@@ -14,15 +14,14 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#38e07b",
-                        "background-light": "#f6f8f7",
-                        "background-dark": "#122017",
-                        "card-dark": "#1b3124",
-                        "card-border": "#366348",
-                        "text-primary-dark": "#ffffff",
-                        "text-secondary-dark": "#96c5a9",
-                        "danger": "#f44336",
-                        "danger-light": "#3f2423"
+                        "primary": "#3B82F6", // Main blue color
+                        "background-dark": "#1E293B", // Dark slate background
+                        "card-dark": "#334155", // Lighter slate for cards
+                        "card-border": "#475569", // Slate border
+                        "text-primary-dark": "#F8FAFC", // Brightest text (off-white)
+                        "text-secondary-dark": "#94A3B8", // Muted slate text
+                        "danger": "#EF4444", // Red for delete
+                        "danger-light": "#334155" // Card color for delete bg
                     },
                     fontFamily: {
                         "display": ["Manrope", "sans-serif"]
@@ -40,13 +39,12 @@
     
     <style>
         body {
-            background-color: #122017;
+            background-color: #1E293B; /* Dark slate background */
             font-family: 'Manrope', "Noto Sans", sans-serif;
         }
         .progress-circle-anim {
             transition: stroke-dashoffset 1s ease-out;
         }
-        /* This is the new page navigation system */
         .page {
             display: none; /* All pages are hidden by default */
         }
@@ -63,19 +61,19 @@
 <body class="bg-background-dark font-display">
 
     <div id="page-dashboard" class="page" style="display: block;"> <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div id="btn-open-menu" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
-                <span class="material-symbols-outlined text-white" style="font-size: 24px;">menu</span>
+            <div id="btn-open-menu" onclick="navShowPage('page-menu')" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
+                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">menu</span>
             </div>
-            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Sales Dashboard</h2>
+            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Sales Dashboard</h2>
             <div class="flex w-12 items-center justify-end">
-                <button id="btn-refresh" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
-                    <span class="material-symbols-outlined text-white" style="font-size: 24px;">refresh</span>
+                <button id="btn-refresh" onclick="loadData()" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-text-primary-dark gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">refresh</span>
                 </button>
             </div>
         </div>
         
         <div class="p-4 @container">
-            <div class="flex flex-col items-center justify-start rounded-xl shadow-[0_0_10px_rgba(56,224,123,0.1)] bg-gradient-to-br from-[#1b3124] to-[#122017] p-6">
+            <div class="flex flex-col items-center justify-start rounded-xl shadow-[0_0_10px_rgba(59,130,246,0.1)] bg-gradient-to-br from-card-dark to-background-dark p-6">
                 
                 <div class="relative flex items-center justify-center w-48 h-48 mb-4">
                     <svg class="w-full h-full transform -rotate-90">
@@ -83,31 +81,31 @@
                         <circle id="progress-circle" class="progress-circle-anim text-primary" cx="96" cy="96" fill="transparent" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" stroke-width="10"></circle>
                     </svg>
                     <div class="absolute flex flex-col items-center">
-                        <span id="progress-percent" class="text-white text-4xl font-bold">0%</span>
+                        <span id="progress-percent" class="text-text-primary-dark text-4xl font-bold">0%</span>
                         <span class="text-text-secondary-dark text-sm">Achieved</span>
                     </div>
                 </div>
                 
                 <div class="text-center">
                     <p class="text-text-secondary-dark text-base font-normal leading-normal">Monthly Target</p>
-                    <p id="progress-target" class="text-white text-3xl font-bold leading-tight tracking-[-0.015em]">0 LKR</p>
+                    <p id="progress-target" class="text-text-primary-dark text-3xl font-bold leading-tight tracking-[-0.015em]">0 LKR</p>
                 </div>
                 
                 <div class="w-full mt-6 grid grid-cols-2 gap-4">
                     <div class="text-center">
-                        <p id="progress-sales-total" class="text-white text-lg font-bold">0</p>
+                        <p id="progress-sales-total" class="text-text-primary-dark text-lg font-bold">0</p>
                         <p class="text-text-secondary-dark text-sm font-normal">Total Sales</p>
                     </div>
                     <div class="text-center">
-                        <p id="progress-remaining" class="text-white text-lg font-bold">0</p>
+                        <p id="progress-remaining" class="text-text-primary-dark text-lg font-bold">0</p>
                         <p class="text-text-secondary-dark text-sm font-normal">Remaining</p>
                     </div>
                     <div class="text-center">
-                        <p id="progress-devices-total" class="text-white text-lg font-bold">0</p>
+                        <p id="progress-devices-total" class="text-text-primary-dark text-lg font-bold">0</p>
                         <p class="text-text-secondary-dark text-sm font-normal">Total Devices</p>
                     </div>
                     <div class="text-center">
-                        <p id="progress-leads-total" class="text-white text-lg font-bold">0</p>
+                        <p id="progress-leads-total" class="text-text-primary-dark text-lg font-bold">0</p>
                         <p class="text-text-secondary-dark text-sm font-normal">Total Leads</p>
                     </div>
                 </div>
@@ -115,7 +113,7 @@
         </div>
         
         <div class="px-4">
-            <h3 class="text-white text-lg font-bold mb-2">Daily Sales</h3>
+            <h3 class="text-text-primary-dark text-lg font-bold mb-2">Daily Sales</h3>
         </div>
         <div class="flex overflow-x-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-4">
             <div id="daily-sales-container" class="flex items-stretch px-4 gap-3">
@@ -123,18 +121,18 @@
         </div>
         
         <div class="px-4 mt-2">
-            <h3 class="text-white text-lg font-bold mb-2">Milestones</h3>
+            <h3 class="text-text-primary-dark text-lg font-bold mb-2">Milestones</h3>
         </div>
         <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md">
                 <div class="flex flex-col gap-1">
-                    <p class="text-white text-base font-bold leading-tight">To 50%</p>
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">To 50%</p>
                     <p id="milestone-50" class="text-text-secondary-dark text-sm font-normal leading-normal">Sales needed: 0 LKR</p>
                 </div>
             </div>
             <div class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md">
                 <div class="flex flex-col gap-1">
-                    <p class="text-white text-base font-bold leading-tight">To 70%</p>
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">To 70%</p>
                     <p id="milestone-70" class="text-text-secondary-dark text-sm font-normal leading-normal">Sales needed: 0 LKR</p>
                 </div>
             </div>
@@ -146,18 +144,18 @@
     <div id="page-menu" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
-                <button class="nav-button text-white" data-page="page-dashboard">
+                <button class="nav-button text-text-primary-dark" data-page="page-dashboard">
                     <span class="material-symbols-outlined" style="font-size: 24px;">close</span>
                 </button>
             </div>
-            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Menu</h2>
+            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Menu</h2>
             <div class="flex w-12 items-center justify-end"></div>
         </div>
 
         <div class="p-4 flex flex-col gap-4">
             <button data-page="page-edit-target" class="nav-button flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
                 <div class="flex flex-col gap-1 text-left">
-                    <p class="text-white text-base font-bold leading-tight">Edit Monthly Target</p>
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">Edit Monthly Target</p>
                     <p class="text-text-secondary-dark text-sm font-normal leading-normal">Set your sales goal for the month.</p>
                 </div>
                 <span class="material-symbols-outlined text-text-secondary-dark">edit</span>
@@ -165,18 +163,18 @@
             
             <button data-page="page-about" class="nav-button flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
                 <div class="flex flex-col gap-1 text-left">
-                    <p class="text-white text-base font-bold leading-tight">About</p>
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">About</p>
                     <p class="text-text-secondary-dark text-sm font-normal leading-normal">View developer information.</p>
                 </div>
                 <span class="material-symbols-outlined text-text-secondary-dark">info</span>
             </button>
 
-            <button id="btn-reset-data" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
+            <button id="btn-reset-data" onclick="resetData()" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
                 <div class="flex flex-col gap-1 text-left">
-                    <p class="text-white text-base font-bold leading-tight">Reset Data</p>
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">Reset Data</p>
                     <p class="text-text-secondary-dark text-sm font-normal leading-normal">Clear all data for a new month.</p>
                 </div>
-                <span class="material-symbols-outlined text-red-400">delete</span>
+                <span class="material-symbols-outlined text-danger">delete</span>
             </button>
         </div>
     </div>
@@ -185,11 +183,11 @@
     <div id="page-add-sale" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start">
-                <button class="nav-button text-white" data-page="page-dashboard">
+                <button class="nav-button text-text-primary-dark" data-page="page-dashboard">
                     <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
                 </button>
             </div>
-            <h2 id="add-sale-header" class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Add Daily Sale</h2>
+            <h2 id="add-sale-header" class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Add Daily Sale</h2>
             <div class="flex w-12 items-center justify-end"></div>
         </div>
 
@@ -209,13 +207,13 @@
         </div>
         
         <div class="px-4 py-4 mt-4">
-            <button id="btn-save-sale" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
+            <button id="btn-save-sale" onclick="saveDailySale()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
                 Add Sale
             </button>
         </div>
 
         <div id="delete-sale-section" class="px-4 py-2" style="display: none;">
-            <button id="btn-delete-sale" class="w-full bg-danger-light text-danger font-bold py-3 px-4 rounded-lg hover:bg-danger hover:text-white focus:outline-none">
+            <button id="btn-delete-sale" onclick="deleteSale()" class="w-full bg-danger-light text-danger font-bold py-3 px-4 rounded-lg hover:bg-danger hover:text-white focus:outline-none">
                 Delete This Entry
             </button>
         </div>
@@ -224,10 +222,10 @@
 
     <div id="page-edit-target" class="page">
         <header class="flex items-center justify-between bg-card-dark p-4 pb-2">
-            <button class="nav-button flex size-12 shrink-0 items-center justify-start text-white" data-page="page-menu">
+            <button class="nav-button flex size-12 shrink-0 items-center justify-start text-text-primary-dark" data-page="page-menu">
                 <span class="material-symbols-outlined">close</span>
             </button>
-            <h1 class="flex-1 text-center text-lg font-bold text-white">Edit Monthly Target</h1>
+            <h1 class="flex-1 text-center text-lg font-bold text-text-primary-dark">Edit Monthly Target</h1>
             <div class="w-12"></div>
         </header>
 
@@ -235,23 +233,23 @@
             <section class="mb-8">
                 <div class="rounded-xl bg-card-dark p-6 shadow-md">
                     <p class="text-base text-text-secondary-dark">Current Monthly Target:</p>
-                    <p id="edit-target-current" class="text-4xl font-bold text-white mt-2">0 LKR</p>
+                    <p id="edit-target-current" class="text-4xl font-bold text-text-primary-dark mt-2">0 LKR</p>
                 </div>
             </section>
             <p class="text-text-secondary-dark pb-3 pt-1">Enter your new monthly sales goal.</p>
             <div class="flex max-w-full flex-col gap-4">
                 <label class="flex flex-col">
-                    <p class="pb-2 text-base font-medium text-white">New Monthly Target (LKR):</p>
+                    <p class="pb-2 text-base font-medium text-text-primary-dark">New Monthly Target (LKR):</p>
                     <div class="relative">
                         <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-text-secondary-dark">LKR</span>
-                        <input id="edit-target-input" class="form-input flex w-full resize-none overflow-hidden rounded-lg border border-card-border bg-card-dark h-14 pl-12 p-4 text-base font-normal text-white placeholder:text-text-secondary-dark focus:border-primary focus:ring-primary" placeholder="660,000" type="number" />
+                        <input id="edit-target-input" class="form-input flex w-full resize-none overflow-hidden rounded-lg border border-card-border bg-card-dark h-14 pl-12 p-4 text-base font-normal text-text-primary-dark placeholder:text-text-secondary-dark focus:border-primary focus:ring-primary" placeholder="660,000" type="number" />
                     </div>
                 </label>
             </div>
         </main>
         
         <footer class="p-4">
-            <button id="btn-save-target" class="w-full rounded-lg bg-primary py-4 text-center text-base font-bold text-background-dark">
+            <button id="btn-save-target" onclick="saveTarget()" class="w-full rounded-lg bg-primary py-4 text-center text-base font-bold text-background-dark">
                 Save Changes
             </button>
         </footer>
@@ -260,10 +258,10 @@
 
     <div id="page-about" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <button class="nav-button text-white flex size-12 shrink-0 items-center justify-center" data-page="page-menu">
+            <button class="nav-button text-text-primary-dark flex size-12 shrink-0 items-center justify-center" data-page="page-menu">
                 <span class="material-symbols-outlined">arrow_back</span>
             </button>
-            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">About</h2>
+            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">About</h2>
             <div class="w-12"></div>
         </div>
         
@@ -273,7 +271,7 @@
                     <div class="flex w-full flex-col gap-4 items-center">
                         <div class="flex gap-4 flex-col items-center">
                             <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-2 border-card-border" data-alt="A professional headshot of Supun Dilshan" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBoYAlMgsO411tE90-z21aoa130TqNyCzKhBiCgu03nLF40XpgJ8N3w1rT7S71Y_euUxjOAtlM_tVveq91sZ4y--mH2nl0ZgrbXulP1cXHnvgO-bKFsr0ZlkZKxpidEBTho6RRSc7crQ1tKJqRECzIrkZt4skkz9nNmMoIyL1Z697KtX80Ssz_MX3kW80W2wqYY9HEuAsf5rI2sxChuXY8uu2KcRlIwekRxH_wDMLB6lE1Q4oQnwGlEmjJUxyM4Mm9HhdiyI29RXj0");'></div>
-                            <p class="text-white text-2xl font-bold leading-tight tracking-[-0.015em] text-center">Supun Dilshan</p>
+                            <p class="text-text-primary-dark text-2xl font-bold leading-tight tracking-[-0.015em] text-center">Supun Dilshan</p>
                         </div>
                     </div>
                 </div>
@@ -282,21 +280,21 @@
                     <div class="gap-4 px-4 grid-cols-3 grid">
                         <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
                             <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-white" style="font-size: 24px;">work</span>
+                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">work</span>
                             </div>
-                            <p class="text-white text-sm font-medium leading-normal">LinkedIn</p>
+                            <p class="text-text-primary-dark text-sm font-medium leading-normal">LinkedIn</p>
                         </div>
                         <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
                             <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-white" style="font-size: 24px;">code</span>
+                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">code</span>
                             </div>
-                            <p class="text-white text-sm font-medium leading-normal">GitHub</p>
+                            <p class="text-text-primary-dark text-sm font-medium leading-normal">GitHub</p>
                         </div>
                         <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
                             <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-white" style="font-size: 24px;">public</span>
+                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">public</span>
                             </div>
-                            <p class="text-white text-sm font-medium leading-normal">Website</p>
+                            <p class="text-text-primary-dark text-sm font-medium leading-normal">Website</p>
                         </div>
                     </div>
                 </div>
@@ -315,15 +313,13 @@
 
         // --- GLOBAL VARIABLES ---
         let pages;
-        let btnOpenMenu;
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
         let progressRemaining, progressDevicesTotal, progressLeadsTotal;
-        let dailySalesContainer, milestone50, milestone70, btnRefresh;
-        let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput, btnSaveSale;
-        let editTargetCurrent, editTargetInput, btnSaveTarget;
-        let btnResetData, deleteSaleSection, btnDeleteSale;
+        let dailySalesContainer, milestone50, milestone70;
+        let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput;
+        let editTargetCurrent, editTargetInput;
+        let deleteSaleSection;
         
-        /** This keeps track of which sale index we are editing. null = new sale */
         let currentlyEditingIndex = null;
 
         // --- UTILITY FUNCTIONS ---
@@ -331,10 +327,9 @@
         const formatNumber = (num) => (num || 0).toLocaleString('en-US');
         const formatLKR = (num) => `${formatNumber(num)} LKR`;
         
-        /** Shows a page and hides all others */
         function navShowPage(pageId) {
+            if (!pages) pages = document.querySelectorAll('.page'); // Failsafe
             pages.forEach(page => {
-                // Use inline style for reliable show/hide
                 page.style.display = (page.id === pageId) ? 'block' : 'none';
             });
             window.scrollTo(0, 0);
@@ -351,7 +346,6 @@
             return listJSON ? JSON.parse(listJSON) : [];
         }
 
-        /** This is the main function. It loads all data and updates the UI. */
         function loadData() {
             const target = getTarget();
             const salesList = getSalesList();
@@ -388,20 +382,18 @@
             editTargetCurrent.textContent = formatLKR(target);
         }
 
-        /** Renders the horizontal list of daily sales cards */
         function renderDailySales(salesList) {
             let html = '';
             
             salesList.forEach((sale, index) => {
-                // NEW: Added a wrapper 'div' and an 'edit' button
                 html += `
                 <div class="relative">
                     <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md pr-10">
-                        <p class="text-white text-base font-medium leading-normal">Day ${index + 1}</p>
+                        <p class="text-text-primary-dark text-base font-medium leading-normal">Day ${index + 1}</p>
                         <p class="text-primary text-xl font-bold">${formatLKR(sale.sales)}</p>
                         <p class="text-text-secondary-dark text-sm">${formatNumber(sale.devices)} devices, ${formatNumber(sale.leads)} leads</p>
                     </div>
-                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-index="${index}">
+                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-index="${index}" onclick="handleEditSaleClick(event)">
                         <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
                     </button>
                 </div>
@@ -409,7 +401,7 @@
             });
 
             html += `
-            <button data-page="page-add-sale" class="nav-button-add flex h-full flex-1 flex-col items-center justify-center gap-2 rounded-lg min-w-40 bg-card-dark/50 p-4 border-2 border-dashed border-card-border">
+            <button class="nav-button-add flex h-full flex-1 flex-col items-center justify-center gap-2 rounded-lg min-w-40 bg-card-dark/50 p-4 border-2 border-dashed border-card-border" onclick="handleAddSaleClick()">
                 <span class="material-symbols-outlined text-text-secondary-dark" style="font-size: 32px;">add</span>
                 <p class="text-text-secondary-dark text-base font-medium leading-normal">Add Sale</p>
             </button>
@@ -417,11 +409,10 @@
 
             dailySalesContainer.innerHTML = html;
             
-            // Re-attach listeners for ALL navigation buttons
+            // Re-attach listeners for standard nav buttons
             attachNavButtonListeners();
         }
         
-        /** Saves the new monthly target */
         function saveTarget() {
             const newTarget = parseFloat(editTargetInput.value) || 0;
             localStorage.setItem(TARGET_KEY, newTarget);
@@ -431,49 +422,34 @@
             navShowPage('page-menu');
         }
 
-        /** NEW: Prepares the "Add Sale" page for editing */
         function openEditPage(index) {
             const salesList = getSalesList();
             const saleToEdit = salesList[index];
+            if (!saleToEdit) return;
+            currentlyEditingIndex = index;
 
-            if (!saleToEdit) return; // Safety check
-
-            currentlyEditingIndex = index; // Set global index
-
-            // Update page title and button
             addSaleHeader.textContent = `Edit Day ${index + 1}`;
             btnSaveSale.textContent = 'Save Changes';
-            
-            // Show the delete button
             deleteSaleSection.style.display = 'block';
 
-            // Fill inputs with existing data
             addSaleDevicesInput.value = saleToEdit.devices;
             addSaleRevenueInput.value = saleToEdit.sales;
             addSaleLeadsInput.value = saleToEdit.leads;
 
-            // Go to the page
             navShowPage('page-add-sale');
         }
 
-        /** NEW: Resets the "Add Sale" page to its default state */
         function resetAddSalePage() {
-            currentlyEditingIndex = null; // Clear index
-
-            // Reset title and button
+            currentlyEditingIndex = null;
             addSaleHeader.textContent = 'Add Daily Sale';
             btnSaveSale.textContent = 'Add Sale';
-
-            // Hide delete button
             deleteSaleSection.style.display = 'none';
 
-            // Clear inputs
             addSaleRevenueInput.value = '';
             addSaleDevicesInput.value = '';
             addSaleLeadsInput.value = '';
         }
 
-        /** MODIFIED: Now handles both ADDING and EDITING */
         function saveDailySale() {
             const newSales = parseFloat(addSaleRevenueInput.value) || 0;
             const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
@@ -483,13 +459,11 @@
 
             if (currentlyEditingIndex !== null) {
                 // --- EDIT MODE ---
-                const index = currentlyEditingIndex;
-                salesList[index] = {
+                salesList[currentlyEditingIndex] = {
                     sales: newSales,
                     devices: newDevices,
                     leads: newLeads
                 };
-
             } else {
                 // --- ADD MODE ---
                 if (newSales === 0 && newDevices === 0 && newLeads === 0) {
@@ -503,22 +477,18 @@
                 });
             }
 
-            // Save updated list
             localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
-
-            resetAddSalePage(); // Reset the form
+            resetAddSalePage();
             loadData();
             navShowPage('page-dashboard');
         }
 
-        /** NEW: Deletes a sale entry */
         function deleteSale() {
-            if (currentlyEditingIndex === null) return; // Safety check
-
+            if (currentlyEditingIndex === null) return;
             if (confirm("Are you sure you want to delete this sales entry?")) {
                 const salesList = getSalesList();
-                salesList.splice(currentlyEditingIndex, 1); // Remove the item
-                localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList)); // Save
+                salesList.splice(currentlyEditingIndex, 1);
+                localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
                 
                 resetAddSalePage();
                 loadData();
@@ -526,7 +496,6 @@
             }
         }
 
-        /** FIXED: This function now works */
         function resetData() {
             if (confirm("Are you sure you want to delete all data? This is for starting a new month.")) {
                 localStorage.removeItem(TARGET_KEY);
@@ -536,27 +505,14 @@
             }
         }
 
-        /** Attaches click listeners to all navigation buttons */
+        // --- BUTTON CLICK HANDLERS (called from HTML) ---
+
         function attachNavButtonListeners() {
-            // Standard page buttons
             const navButtons = document.querySelectorAll('.nav-button');
             navButtons.forEach(button => {
+                // Remove old one (if any) and add new one
                 button.removeEventListener('click', handleNavClick);
                 button.addEventListener('click', handleNavClick);
-            });
-
-            // "Add Sale" button
-            const addSaleButton = document.querySelector('.nav-button-add');
-            if (addSaleButton) {
-                addSaleButton.removeEventListener('click', handleAddSaleClick);
-                addSaleButton.addEventListener('click', handleAddSaleClick);
-            }
-
-            // NEW: "Edit Sale" buttons
-            const editSaleButtons = document.querySelectorAll('.btn-edit-sale');
-            editSaleButtons.forEach(button => {
-                button.removeEventListener('click', handleEditSaleClick);
-                button.addEventListener('click', handleEditSaleClick);
             });
         }
         
@@ -568,7 +524,7 @@
         }
 
         function handleAddSaleClick() {
-            resetAddSalePage(); // Make sure form is in "add" mode
+            resetAddSalePage();
             navShowPage('page-add-sale');
         }
 
@@ -582,7 +538,6 @@
             
             // Assign all element variables
             pages = document.querySelectorAll('.page');
-            btnOpenMenu = document.getElementById('btn-open-menu');
             progressCircle = document.getElementById('progress-circle');
             progressPercent = document.getElementById('progress-percent');
             progressTarget = document.getElementById('progress-target');
@@ -593,36 +548,17 @@
             dailySalesContainer = document.getElementById('daily-sales-container');
             milestone50 = document.getElementById('milestone-50');
             milestone70 = document.getElementById('milestone-70');
-            btnRefresh = document.getElementById('btn-refresh');
-            
             addSaleHeader = document.getElementById('add-sale-header');
             addSaleDevicesInput = document.getElementById('add-sale-devices');
             addSaleRevenueInput = document.getElementById('add-sale-revenue');
             addSaleLeadsInput = document.getElementById('add-sale-leads');
             btnSaveSale = document.getElementById('btn-save-sale');
             deleteSaleSection = document.getElementById('delete-sale-section');
-            btnDeleteSale = document.getElementById('btn-delete-sale');
-            
             editTargetCurrent = document.getElementById('edit-target-current');
             editTargetInput = document.getElementById('edit-target-input');
-            btnSaveTarget = document.getElementById('btn-save-target');
             
-            btnResetData = document.getElementById('btn-reset-data');
-
-            
-            // Attach Listeners for Page Navigation
+            // Attach Listeners for standard nav buttons
             attachNavButtonListeners();
-            btnOpenMenu.addEventListener('click', () => navShowPage('page-menu'));
-
-            // Attach Listeners for Actions
-            btnRefresh.addEventListener('click', loadData);
-            btnSaveSale.addEventListener('click', saveDailySale);
-This is a test.
-            btnDeleteSale.addEventListener('click', deleteSale); // NEW
-            btnSaveTarget.addEventListener('click', saveTarget);
-            
-            // FIXED: Removed the typo before this line
-            btnResetData.addEventListener('click', resetData);
 
             // Load Data on Startup
             loadData();
