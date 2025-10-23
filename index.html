@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary-color: #4CAF50; /* A nice green */
+            --primary-color: #4CAF50; /* Green */
             --primary-dark: #388E3C;
-            --accent-color: #2196F3; /* A vibrant blue */
+            --accent-color: #2196F3; /* Blue */
+            --danger-color: #f44336; /* Red */
+            --danger-light: #ffebee;
             --background-light: #f0f2f5;
             --background-card: #ffffff;
             --text-dark: #333333;
@@ -23,44 +26,73 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--background-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
             color: var(--text-dark);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* --- Header --- */
+        .header {
+            background-color: var(--background-card);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px var(--shadow-light);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .menu-icon {
+            cursor: pointer;
+            padding: 5px;
+        }
+        .menu-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-medium);
+            stroke-width: 2.5;
+        }
+
+        /* --- Page Container --- */
         .container {
             width: 100%;
             max-width: 480px;
+            margin: 20px auto; /* Centered with top margin */
+            padding: 20px;
+            box-sizing: border-box; /* Include padding in width */
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .page {
             background-color: var(--background-card);
-            padding: 35px 30px;
+            padding: 25px;
             border-radius: 16px;
             box-shadow: 0 10px 30px var(--shadow-medium);
-            animation: fadeIn 0.8s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h1 {
+        h2 {
             text-align: center;
-            color: var(--primary-dark);
             margin-top: 0;
-            margin-bottom: 35px;
-            font-weight: 700;
-            font-size: 1.8rem;
-        }
-
-        .input-group {
             margin-bottom: 25px;
+            color: var(--text-dark);
         }
 
+        /* --- Input Styles --- */
+        .input-group {
+            margin-bottom: 20px;
+        }
         .input-group label {
             display: block;
             margin-bottom: 10px;
@@ -68,7 +100,6 @@
             color: var(--text-medium);
             font-size: 0.95rem;
         }
-
         .input-group input {
             width: calc(100% - 24px); /* Account for padding */
             padding: 14px 12px;
@@ -80,18 +111,47 @@
             background-color: #fcfcfc;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
         .input-group input:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
         
-        /* Progress Bar */
-        .progress-section {
-            margin-bottom: 30px;
+        /* --- Button Styles --- */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px var(--shadow-light);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        .btn-secondary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #1976D2;
         }
 
+        /* --- Tracker Page --- */
+        .progress-section {
+            margin-bottom: 25px;
+        }
         #percentage-label {
             text-align: center;
             margin-bottom: 15px;
@@ -99,16 +159,13 @@
             color: var(--text-dark);
             font-size: 1rem;
         }
-
         .progress-container {
             width: 100%;
             background-color: var(--border-color);
             border-radius: 20px;
             height: 30px;
             overflow: hidden;
-            position: relative;
         }
-
         .progress-bar {
             width: 0%;
             height: 100%;
@@ -120,17 +177,22 @@
             color: white;
             font-weight: 600;
             font-size: 0.9rem;
-            transition: width 0.6s ease-in-out, background-color 0.3s ease;
-            white-space: nowrap; /* Prevent text wrapping */
-        }
-        
-        /* Results Section */
-        .results-grid {
-            display: grid;
-            gap: 15px;
+            transition: width 0.6s ease-in-out;
+            white-space: nowrap;
         }
 
-        .milestone {
+        .daily-entry {
+            background-color: var(--background-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .daily-entry .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .display-card {
             background-color: var(--background-light);
             padding: 18px 20px;
             border-radius: 10px;
@@ -138,108 +200,187 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 20px;
+        }
+        .display-card span {
+            font-weight: 500;
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+        .display-card strong {
+            font-size: 1.2em;
+            color: var(--primary-dark);
+            font-weight: 700;
         }
 
-        .milestone:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px var(--shadow-light);
+        .results-grid {
+            display: grid;
+            gap: 15px;
         }
-
+        .milestone {
+            background-color: #f9f9f9;
+            padding: 18px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .milestone span {
             font-weight: 500;
             color: var(--text-medium);
             font-size: 0.9rem;
         }
-
         .milestone strong {
             font-size: 1.2em;
             color: var(--accent-color);
             font-weight: 700;
         }
-
         .milestone strong.achieved {
             color: var(--primary-color);
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .container {
-                margin: 20px;
-                padding: 25px 20px;
-            }
-            h1 {
-                font-size: 1.6rem;
-                margin-bottom: 25px;
-            }
-            .input-group label {
-                font-size: 0.9rem;
-            }
-            .input-group input {
-                padding: 12px 10px;
-                font-size: 0.95rem;
-            }
-            .milestone strong {
-                font-size: 1.1em;
-            }
-            .progress-bar {
-                font-size: 0.85rem;
-            }
+        /* --- Settings Page --- */
+        #page-settings {
+            display: none; /* Hidden by default */
+        }
+        .reset-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+        #resetButton {
+            width: auto;
+            background-color: var(--danger-light);
+            color: var(--danger-color);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        #resetButton:hover {
+            background-color: var(--danger-color);
+            color: white;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>📈 Sales Tracker</h1>
-
-        <div class="input-group">
-            <label for="monthlyTarget">Monthly Target (100%)</label>
-            <input type="number" id="monthlyTarget" placeholder="e.g., 500,000" oninput="calculateSales()">
-        </div>
-
-        <div class="input-group">
-            <label for="nowSales">Current Sales Value</label>
-            <input type="number" id="nowSales" placeholder="e.g., 120,000" oninput="calculateSales()">
-        </div>
-
-        <div class="progress-section">
-            <h3 id="percentage-label">Percentage Achieved: <span id="currentPercentage">0%</span></h3>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-        </div>
-        
-        <div class="results-grid">
-            <div class="milestone">
-                <span>Remaining for 50%</span>
-                <strong id="to50">0</strong>
-            </div>
-            <div class="milestone">
-                <span>Remaining for 70%</span>
-                <strong id="to70">0</strong>
-            </div>
-            <div class="milestone">
-                <span>Remaining for 100% (Target)</span>
-                <strong id="to100">0</strong>
-            </div>
+    <div class="header">
+        <span class="page-title">📈 Sales Tracker</span>
+        <div class="menu-icon" id="menuIcon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
         </div>
     </div>
 
-    <script>
-        function calculateSales() {
-            const target = parseFloat(document.getElementById('monthlyTarget').value) || 0;
-            const current = parseFloat(document.getElementById('nowSales').value) || 0;
+    <div class="container">
+    
+        <div class="page" id="page-tracker">
+            
+            <div class="progress-section">
+                <h3 id="percentage-label">Percentage Achieved: <span id="currentPercentage">0%</span></h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
 
-            const progressBar = document.getElementById('progressBar');
-            const currentPercentageSpan = document.getElementById('currentPercentage');
-            const to50El = document.getElementById('to50');
-            const to70El = document.getElementById('to70');
-            const to100El = document.getElementById('to100');
+            <div class="display-card">
+                <span>Daily Device Count</span>
+                <strong id="deviceCountDisplay">0</strong>
+            </div>
+
+            <div class="daily-entry">
+                <h2>Add Daily Sale</h2>
+                <div class="input-group">
+                    <label for="dailySaleAmount">New Sale Amount</label>
+                    <input type="number" id="dailySaleAmount" placeholder="e.g., 50000">
+                </div>
+                <button id="addSaleButton" class="btn-primary">Add to Current Sales</button>
+            </div>
+            
+            <div class="results-grid">
+                <div class="milestone">
+                    <span>Remaining for 50%</span>
+                    <strong id="to50">0</strong>
+                </div>
+                <div class="milestone">
+                    <span>Remaining for 70%</span>
+                    <strong id="to70">0</strong>
+                </div>
+                <div class="milestone">
+                    <span>Remaining for 100% (Target)</span>
+                    <strong id="to100">0</strong>
+                </div>
+            </div>
+
+        </div> <div class="page" id="page-settings">
+            <h2>⚙️ Settings</h2>
+
+            <div class="input-group">
+                <label for="monthlyTarget">Monthly Target</label>
+                <input type="number" id="monthlyTarget" placeholder="e.g., 500,000">
+            </div>
+
+            <div class="input-group">
+                <label for="deviceCount">Daily Device Count</label>
+                <input type="number" id="deviceCount" placeholder="e.g., 10">
+            </div>
+
+            <div class="input-group">
+                <label for="nowSales">Current Sales Value (Manual Edit)</label>
+                <input type="number" id="nowSales" placeholder="e.g., 120,000">
+            </div>
+            
+            <button id="saveButton" class="btn-secondary">Save & Go Back</button>
+
+            <div class="reset-section">
+                <button id="resetButton">Reset All Data (New Month)</button>
+            </div>
+
+        </div> </div> <script>
+        // --- 1. Define Keys for localStorage ---
+        const TARGET_KEY = 'salesTracker_target';
+        const CURRENT_KEY = 'salesTracker_current';
+        const DEVICE_COUNT_KEY = 'salesTracker_deviceCount'; // New Key
+
+        // --- 2. Get All HTML Elements ---
+        
+        // Navigation
+        const menuIcon = document.getElementById('menuIcon');
+        const pageTracker = document.getElementById('page-tracker');
+        const pageSettings = document.getElementById('page-settings');
+        
+        // Settings Page Elements
+        const monthlyTargetInput = document.getElementById('monthlyTarget');
+        const nowSalesInput = document.getElementById('nowSales');
+        const deviceCountInput = document.getElementById('deviceCount'); // New Input
+        const saveButton = document.getElementById('saveButton');
+        const resetButton = document.getElementById('resetButton');
+        
+        // Tracker Page Elements
+        const dailySaleInput = document.getElementById('dailySaleAmount');
+        const addSaleButton = document.getElementById('addSaleButton');
+        const progressBar = document.getElementById('progressBar');
+        const currentPercentageSpan = document.getElementById('currentPercentage');
+        const deviceCountDisplay = document.getElementById('deviceCountDisplay'); // New Display
+        const to50El = document.getElementById('to50');
+        const to70El = document.getElementById('to70');
+        const to100El = document.getElementById('to100');
+        
+
+        // --- 3. Main UI Update Functions ---
+        
+        function updateProgressUI(target, current) {
+            target = parseFloat(target) || 0;
+            current = parseFloat(current) || 0;
             
             if (target === 0) {
                 progressBar.style.width = '0%';
-                progressBar.textContent = ''; // Clear text inside bar if no target
+                progressBar.textContent = '';
                 currentPercentageSpan.textContent = '0%';
                 to50El.textContent = '0';
                 to70El.textContent = '0';
@@ -248,7 +389,7 @@
             }
 
             let percentage = (current / target) * 100;
-            let displayPercentage = Math.min(percentage, 100); // Display max 100% in bar
+            let displayPercentage = Math.min(percentage, 100);
 
             const milestone50 = target * 0.5;
             const milestone70 = target * 0.7;
@@ -257,49 +398,110 @@
             let remaining70 = milestone70 - current;
             let remaining100 = target - current;
 
-            // Update the Percentage Bar
+            // Update Progress Bar
             progressBar.style.width = displayPercentage.toFixed(1) + '%';
-            // Only show percentage in bar if it's visible enough
-            if (displayPercentage > 10) { 
-                progressBar.textContent = displayPercentage.toFixed(1) + '%';
-            } else {
-                progressBar.textContent = '';
-            }
-            currentPercentageSpan.textContent = percentage.toFixed(1) + '%'; // Full percentage displayed next to label
+            progressBar.textContent = displayPercentage > 10 ? displayPercentage.toFixed(1) + '%' : '';
+            currentPercentageSpan.textContent = percentage.toFixed(1) + '%';
 
-            // Update the "Need for..." text
-            const formatNumber = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            // Update Milestone Text
+            updateMilestone(to50El, remaining50);
+            updateMilestone(to70El, remaining70);
+            updateMilestone(to100El, remaining100);
+        }
 
-            // For 50%
-            if (remaining50 <= 0) {
-                to50El.textContent = 'Achieved!';
-                to50El.classList.add('achieved');
+        function updateMilestone(element, remaining) {
+            if (remaining <= 0) {
+                element.textContent = 'Achieved!';
+                element.classList.add('achieved');
             } else {
-                to50El.textContent = formatNumber(remaining50);
-                to50El.classList.remove('achieved');
-            }
-
-            // For 70%
-            if (remaining70 <= 0) {
-                to70El.textContent = 'Achieved!';
-                to70El.classList.add('achieved');
-            } else {
-                to70El.textContent = formatNumber(remaining70);
-                to70El.classList.remove('achieved');
-            }
-
-            // For 100%
-            if (remaining100 <= 0) {
-                to100El.textContent = 'Achieved!';
-                to100El.classList.add('achieved');
-            } else {
-                to100El.textContent = formatNumber(remaining100);
-                to100El.classList.remove('achieved');
+                element.textContent = remaining.toLocaleString();
+                element.classList.remove('achieved');
             }
         }
+
+        // --- 4. Data Functions (Load, Save) ---
+
+        // Loads all data from localStorage and updates BOTH pages
+        function loadData() {
+            const target = localStorage.getItem(TARGET_KEY) || '';
+            const current = localStorage.getItem(CURRENT_KEY) || '';
+            const deviceCount = localStorage.getItem(DEVICE_COUNT_KEY) || '';
+
+            // Update Settings Page Inputs
+            monthlyTargetInput.value = target;
+            nowSalesInput.value = current;
+            deviceCountInput.value = deviceCount;
+
+            // Update Tracker Page Displays
+            updateProgressUI(target, current);
+            deviceCountDisplay.textContent = parseFloat(deviceCount).toLocaleString() || '0';
+        }
+
+        // Saves all data from the Settings page
+        function saveSettings() {
+            localStorage.setItem(TARGET_KEY, monthlyTargetInput.value);
+            localStorage.setItem(CURRENT_KEY, nowSalesInput.value);
+            localStorage.setItem(DEVICE_COUNT_KEY, deviceCountInput.value);
+        }
+
+        // --- 5. Navigation Functions ---
+        function showSettingsPage() {
+            pageTracker.style.display = 'none';
+            pageSettings.style.display = 'block';
+        }
+        function showTrackerPage() {
+            pageSettings.style.display = 'none';
+            pageTracker.style.display = 'block';
+        }
+
+        // --- 6. Action Functions ---
         
-        // Run the calculation once on page load to initialize values
-        calculateSales();
+        function addDailySale() {
+            const dailyAmount = parseFloat(dailySaleInput.value) || 0;
+            if (dailyAmount === 0) return;
+
+            const currentTotal = parseFloat(localStorage.getItem(CURRENT_KEY)) || 0;
+            const newTotal = currentTotal + dailyAmount;
+
+            // Save the new total
+            localStorage.setItem(CURRENT_KEY, newTotal);
+
+            // Clear the daily input box
+            dailySaleInput.value = '';
+
+            // Reload all data to update the UI
+            loadData();
+        }
+
+        function resetData() {
+            if (confirm("Are you sure you want to reset all data for the new month?")) {
+                localStorage.clear(); // Clears all keys
+                loadData(); // Reloads UI (will show all zeros)
+            }
+        }
+
+        // --- 7. Initialize the App ---
+        function initializeApp() {
+            // Setup Page Navigation
+            menuIcon.addEventListener('click', showSettingsPage);
+            saveButton.addEventListener('click', () => {
+                saveSettings();
+                loadData(); // Reload data just in case
+                showTrackerPage();
+            });
+
+            // Setup Tracker Page Actions
+            addSaleButton.addEventListener('click', addDailySale);
+
+            // Setup Settings Page Actions
+            resetButton.addEventListener('click', resetData);
+
+            // Load all data on first load
+            loadData();
+        }
+
+        // Run the app!
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
     
 </body>
