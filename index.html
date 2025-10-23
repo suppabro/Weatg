@@ -4,131 +4,223 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Tracker</title>
-
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            display: grid;
-            place-items: center;
-            min-height: 90vh;
-            margin: 0;
-            color: #333;
+        :root {
+            --primary-color: #4CAF50; /* A nice green */
+            --primary-dark: #388E3C;
+            --accent-color: #2196F3; /* A vibrant blue */
+            --background-light: #f0f2f5;
+            --background-card: #ffffff;
+            --text-dark: #333333;
+            --text-medium: #555555;
+            --text-light: #888888;
+            --border-color: #e0e0e0;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
         }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
         .container {
             width: 100%;
-            max-width: 450px;
-            background-color: #ffffff;
-            padding: 25px 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            max-width: 480px;
+            background-color: var(--background-card);
+            padding: 35px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow-medium);
+            animation: fadeIn 0.8s ease-out;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: var(--primary-dark);
             margin-top: 0;
+            margin-bottom: 35px;
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
             margin-bottom: 25px;
         }
-        .input-group {
-            margin-bottom: 20px;
-        }
+
         .input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 600;
-            color: #555;
+            color: var(--text-medium);
+            font-size: 0.95rem;
         }
+
         .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box; /* Important for padding to work right */
-            font-size: 16px;
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 14px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: #fcfcfc;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
         
         /* Progress Bar */
+        .progress-section {
+            margin-bottom: 30px;
+        }
+
+        #percentage-label {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
         .progress-container {
             width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 30px;
-            height: 25px;
+            background-color: var(--border-color);
+            border-radius: 20px;
+            height: 30px;
             overflow: hidden;
-            margin-top: 10px;
-            margin-bottom: 25px;
+            position: relative;
         }
+
         .progress-bar {
             width: 0%;
             height: 100%;
-            background-color: #28a745;
-            border-radius: 30px;
-            text-align: center;
-            line-height: 25px;
+            background-color: var(--primary-color);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 14px;
-            transition: width 0.4s ease-in-out;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: width 0.6s ease-in-out, background-color 0.3s ease;
+            white-space: nowrap; /* Prevent text wrapping */
         }
         
         /* Results Section */
         .results-grid {
             display: grid;
-            grid-template-columns: 1fr;
             gap: 15px;
         }
+
         .milestone {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #eee;
+            background-color: var(--background-light);
+            padding: 18px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
+        .milestone:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px var(--shadow-light);
+        }
+
         .milestone span {
             font-weight: 500;
-            color: #666;
+            color: var(--text-medium);
+            font-size: 0.9rem;
         }
+
         .milestone strong {
-            font-size: 1.1em;
-            color: #007bff;
+            font-size: 1.2em;
+            color: var(--accent-color);
+            font-weight: 700;
         }
+
         .milestone strong.achieved {
-            color: #28a745;
+            color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 25px 20px;
+            }
+            h1 {
+                font-size: 1.6rem;
+                margin-bottom: 25px;
+            }
+            .input-group label {
+                font-size: 0.9rem;
+            }
+            .input-group input {
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+            .milestone strong {
+                font-size: 1.1em;
+            }
+            .progress-bar {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Sales Tracker</h1>
+        <h1>📈 Sales Tracker</h1>
 
         <div class="input-group">
             <label for="monthlyTarget">Monthly Target (100%)</label>
-            <input type="number" id="monthlyTarget" placeholder="e.g., 500000" oninput="calculateSales()">
+            <input type="number" id="monthlyTarget" placeholder="e.g., 500,000" oninput="calculateSales()">
         </div>
 
         <div class="input-group">
-            <label for="nowSales">Now Sales Value</label>
-            <input type="number" id="nowSales" placeholder="e.g., 120000" oninput="calculateSales()">
+            <label for="nowSales">Current Sales Value</label>
+            <input type="number" id="nowSales" placeholder="e.g., 120,000" oninput="calculateSales()">
         </div>
 
-        <h3 id="percentage-label" style="text-align: center; margin-bottom: 10px;">Percentage Achieved</h3>
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar">0%</div>
+        <div class="progress-section">
+            <h3 id="percentage-label">Percentage Achieved: <span id="currentPercentage">0%</span></h3>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
         </div>
         
         <div class="results-grid">
             <div class="milestone">
-                <span>Need for 50%</span>
+                <span>Remaining for 50%</span>
                 <strong id="to50">0</strong>
             </div>
             <div class="milestone">
-                <span>Need for 70%</span>
+                <span>Remaining for 70%</span>
                 <strong id="to70">0</strong>
             </div>
             <div class="milestone">
-                <span>Need for 100% (Target)</span>
+                <span>Remaining for 100% (Target)</span>
                 <strong id="to100">0</strong>
             </div>
         </div>
@@ -136,31 +228,27 @@
 
     <script>
         function calculateSales() {
-            // 1. Get the values from the input boxes
             const target = parseFloat(document.getElementById('monthlyTarget').value) || 0;
             const current = parseFloat(document.getElementById('nowSales').value) || 0;
 
-            // 2. Get the elements we need to update
             const progressBar = document.getElementById('progressBar');
+            const currentPercentageSpan = document.getElementById('currentPercentage');
             const to50El = document.getElementById('to50');
             const to70El = document.getElementById('to70');
             const to100El = document.getElementById('to100');
             
-            // Check if target is 0 to avoid errors
             if (target === 0) {
                 progressBar.style.width = '0%';
-                progressBar.textContent = '0%';
+                progressBar.textContent = ''; // Clear text inside bar if no target
+                currentPercentageSpan.textContent = '0%';
                 to50El.textContent = '0';
                 to70El.textContent = '0';
                 to100El.textContent = '0';
                 return;
             }
 
-            // 3. Do the calculations
             let percentage = (current / target) * 100;
-            if (percentage > 100) {
-                percentage = 100; // Cap at 100%
-            }
+            let displayPercentage = Math.min(percentage, 100); // Display max 100% in bar
 
             const milestone50 = target * 0.5;
             const milestone70 = target * 0.7;
@@ -169,18 +257,25 @@
             let remaining70 = milestone70 - current;
             let remaining100 = target - current;
 
-            // 4. Update the Percentage Bar
-            progressBar.style.width = percentage.toFixed(1) + '%';
-            progressBar.textContent = percentage.toFixed(1) + '%';
+            // Update the Percentage Bar
+            progressBar.style.width = displayPercentage.toFixed(1) + '%';
+            // Only show percentage in bar if it's visible enough
+            if (displayPercentage > 10) { 
+                progressBar.textContent = displayPercentage.toFixed(1) + '%';
+            } else {
+                progressBar.textContent = '';
+            }
+            currentPercentageSpan.textContent = percentage.toFixed(1) + '%'; // Full percentage displayed next to label
 
-            // 5. Update the "Need for..." text
-            
+            // Update the "Need for..." text
+            const formatNumber = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
             // For 50%
             if (remaining50 <= 0) {
                 to50El.textContent = 'Achieved!';
                 to50El.classList.add('achieved');
             } else {
-                to50El.textContent = remaining50.toLocaleString();
+                to50El.textContent = formatNumber(remaining50);
                 to50El.classList.remove('achieved');
             }
 
@@ -189,7 +284,7 @@
                 to70El.textContent = 'Achieved!';
                 to70El.classList.add('achieved');
             } else {
-                to70El.textContent = remaining70.toLocaleString();
+                to70El.textContent = formatNumber(remaining70);
                 to70El.classList.remove('achieved');
             }
 
@@ -198,12 +293,12 @@
                 to100El.textContent = 'Achieved!';
                 to100El.classList.add('achieved');
             } else {
-                to100El.textContent = remaining100.toLocaleString();
+                to100El.textContent = formatNumber(remaining100);
                 to100El.classList.remove('achieved');
             }
         }
         
-        // Run the calculation once on page load
+        // Run the calculation once on page load to initialize values
         calculateSales();
     </script>
     
