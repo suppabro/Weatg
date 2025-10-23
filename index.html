@@ -120,6 +120,10 @@
                 <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
                 <input id="signup-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a strong password" type="password" value="" />
             </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Confirm Password</p>
+                <input id="signup-confirm-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Confirm your password" type="password" value="" />
+            </label>
         </div>
         
         <div class="px-4 py-4 mt-4">
@@ -404,7 +408,7 @@
         // =========================================================================
         
         // --- GLOBAL VARIABLES ---
-        let supabase;
+        let supabaseClient; // **FIXED**: Renamed this variable
         let currentUser = null;
         
         let pages;
@@ -413,7 +417,7 @@
         let loginUsernameInput, loginPasswordInput;
 
         // Sign Up Page
-        let signupNameInput, signupLocationInput, signupEmailInput, signupPasswordInput;
+        let signupNameInput, signupLocationInput, signupEmailInput, signupPasswordInput, signupConfirmPasswordInput; // **FIXED**: Added confirm password
 
         // Dashboard Page
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
@@ -450,14 +454,21 @@
                 const location = signupLocationInput.value;
                 const email = signupEmailInput.value;
                 const password = signupPasswordInput.value;
+                const confirmPassword = signupConfirmPasswordInput.value; // **FIXED**: Added confirm password
 
-                if (!name || !location || !email || !password) {
+                if (!name || !location || !email || !password || !confirmPassword) {
                     alert("Please fill in all fields.");
                     return;
                 }
 
+                // **FIXED**: Added password match check
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match. Please try again.");
+                    return;
+                }
+
                 // Supabase handles checking for duplicate emails
-                const { data, error } = await supabase.auth.signUp({
+                const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
@@ -478,6 +489,7 @@
                 signupLocationInput.value = '';
                 signupEmailInput.value = '';
                 signupPasswordInput.value = '';
+                signupConfirmPasswordInput.value = ''; // **FIXED**: Clear confirm password
                 
                 navShowPage('page-login');
                 
@@ -497,7 +509,7 @@
                     return;
                 }
 
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password,
                 });
@@ -520,7 +532,7 @@
 
         async function handleLogout() {
             try {
-                const { error } = await supabase.auth.signOut();
+                const { error } = await supabaseClient.auth.signOut();
                 if (error) throw error;
                 
                 currentUser = null;
@@ -540,7 +552,7 @@
 
             try {
                 // Fetch the target for the current user
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('targets')
                     .select('monthly_target')
                     .eq('user_id', currentUser.id)
@@ -562,7 +574,7 @@
             
             try {
                 // Fetch all sales for the current user, ordered by date
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('sales')
                     .select('*') // Get all columns
                     .eq('user_id', currentUser.id)
@@ -651,7 +663,7 @@
                 
                 // 'upsert' means UPDATE if it exists, or INSERT if it doesn't.
                 // We use 'user_id' as the conflict check, since it's unique.
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('targets')
                     .upsert({ 
                         user_id: currentUser.id, 
@@ -705,7 +717,7 @@
             try {
                 if (currentlyEditingSaleId) {
                     // --- EDIT MODE ---
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('sales')
                         .update({ 
                             revenue: newRevenue, 
@@ -723,7 +735,7 @@
                         return;
                     }
                     
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('sales')
                         .insert({ 
                             user_id: currentUser.id,
@@ -750,7 +762,7 @@
             
             if (confirm("Are you sure you want to delete this sales entry?")) {
                 try {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('sales')
                         .delete()
                         .eq('id', currentlyEditingSaleId);
@@ -774,14 +786,14 @@
             if (confirm("Are you sure you want to delete ALL your sales data for this month?")) {
                 try {
                     // Delete all sales associated with this user
-                    const { error: salesError } = await supabase
+                    const { error: salesError } = await supabaseClient
                         .from('sales')
                         .delete()
                         .eq('user_id', currentUser.id);
                     if (salesError) throw salesError;
 
                     // Reset the user's target to 0
-                    const { error: targetError } = await supabase
+                    const { error: targetError } = await supabaseClient
                         .from('targets')
                         .update({ monthly_target: 0 })
                         .eq('user_id', currentUser.id);
@@ -843,6 +855,7 @@
             signupLocationInput = document.getElementById('signup-location');
             signupEmailInput = document.getElementById('signup-email');
             signupPasswordInput = document.getElementById('signup-password');
+            signupConfirmPasswordInput = document.getElementById('signup-confirm-password'); // **FIXED**: Assign variable
             
             // Dashboard Page
             progressCircle = document.getElementById('progress-circle');
@@ -873,11 +886,14 @@
             // --- APP STARTUP LOGIC (SUPABASE) ---
             
             // 1. Initialize Supabase
-            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            // **FIXED**: Correctly initialize the client
+            const { createClient } = supabase;
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
             // 2. Check for an active session
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (session) {
                     // User is already logged in
