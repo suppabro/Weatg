@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -69,8 +71,8 @@
         
         <div class="flex max-w-full flex-col gap-4 px-4 py-3 mt-8">
             <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username</p>
-                <input id="login-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your username" type="text" value="" />
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username (Email)</p>
+                <input id="login-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your email" type="email" value="" />
             </label>
             <label class="flex flex-col flex-1">
                 <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
@@ -111,16 +113,12 @@
                 <input id="signup-location" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="e.g., Colombo, Sri Lanka" type="text" value="" />
             </label>
             <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username</p>
-                <input id="signup-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a username" type="text" value="" />
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Email</p>
+                <input id="signup-email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your email" type="email" value="" />
             </label>
             <label class="flex flex-col flex-1">
                 <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
-                <input id="signup-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a password" type="password" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Confirm Password</p>
-                <input id="signup-confirm-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Confirm your password" type="password" value="" />
+                <input id="signup-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a strong password" type="password" value="" />
             </label>
         </div>
         
@@ -396,20 +394,26 @@
 
 
     <script>
-        // --- LOCALSTORAGE KEYS ---
-        const USERS_KEY = 'salesApp_users'; // Stores an array of all user objects
+        // =========================================================================
+        // === 1. YOUR SUPABASE KEYS ARE NOW ADDED ===
+        // =========================================================================
+        
+        const SUPABASE_URL = 'https://nnttppvynntwouhbtcgl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udHRwcHZ5bm50d291aGJ0Y2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwNjMwMzQsImV4cCI6MjA3NjYzOTAzNH0.9kO8MfDLxOT1IOAJij7ydx6cGtqNsTCAl4NHWvtyR9M';
 
-        // --- SESSIONSTORAGE KEY ---
-        const CURRENT_USER_KEY = 'salesApp_currentUserSession'; // Stores the *username* of the logged-in user
-
+        // =========================================================================
+        
         // --- GLOBAL VARIABLES ---
+        let supabase;
+        let currentUser = null;
+        
         let pages;
         
         // Login Page
         let loginUsernameInput, loginPasswordInput;
 
         // Sign Up Page
-        let signupNameInput, signupLocationInput, signupUsernameInput, signupPasswordInput, signupConfirmPasswordInput;
+        let signupNameInput, signupLocationInput, signupEmailInput, signupPasswordInput;
 
         // Dashboard Page
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
@@ -419,11 +423,11 @@
         // Add/Edit Sale Page
         let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput;
         let btnSaveSale, deleteSaleSection;
+        let currentlyEditingSaleId = null; // Changed from index to ID
         
         // Edit Target Page
         let editTargetCurrent, editTargetInput;
         
-        let currentlyEditingIndex = null;
 
         // --- UTILITY FUNCTIONS ---
         
@@ -431,140 +435,158 @@
         const formatLKR = (num) => `${formatNumber(num)} LKR`;
         
         function navShowPage(pageId) {
-            if (!pages) pages = document.querySelectorAll('.page'); // Failsafe
+            if (!pages) pages = document.querySelectorAll('.page');
             pages.forEach(page => {
                 page.style.display = (page.id === pageId) ? 'block' : 'none';
             });
             window.scrollTo(0, 0);
         }
 
-        // --- NEW: DYNAMIC KEY FUNCTIONS (FOR PER-USER DATA) ---
+        // --- NEW: AUTHENTICATION FUNCTIONS (SUPABASE) ---
 
-        function getDynamicTargetKey() {
-            const username = sessionStorage.getItem(CURRENT_USER_KEY);
-            if (!username) return null;
-            return `salesApp_target_${username}`;
-        }
+        async function handleSignUp() {
+            try {
+                const name = signupNameInput.value;
+                const location = signupLocationInput.value;
+                const email = signupEmailInput.value;
+                const password = signupPasswordInput.value;
 
-        function getDynamicSalesListKey() {
-            const username = sessionStorage.getItem(CURRENT_USER_KEY);
-            if (!username) return null;
-            return `salesApp_dailySales_${username}`;
-        }
+                if (!name || !location || !email || !password) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
 
+                // Supabase handles checking for duplicate emails
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        // We can store extra info (like name and location)
+                        data: { 
+                            full_name: name,
+                            location: location
+                        }
+                    }
+                });
 
-        // --- NEW: AUTHENTICATION FUNCTIONS (UPDATED) ---
+                if (error) throw error;
 
-        function getAllUsers() {
-            const usersJSON = localStorage.getItem(USERS_KEY);
-            return usersJSON ? JSON.parse(usersJSON) : [];
-        }
-
-        function handleSignUp() {
-            const name = signupNameInput.value;
-            const location = signupLocationInput.value;
-            const username = signupUsernameInput.value.trim().toLowerCase();
-            const password = signupPasswordInput.value;
-            const confirmPassword = signupConfirmPasswordInput.value;
-
-            if (!name || !location || !username || !password || !confirmPassword) {
-                alert("Please fill in all fields.");
-                return;
-            }
-            if (password !== confirmPassword) {
-                alert("Passwords do not match. Please try again.");
+                alert("Sign up successful! Please check your email to confirm your account.");
+                
+                // Clear fields
+                signupNameInput.value = '';
+                signupLocationInput.value = '';
+                signupEmailInput.value = '';
                 signupPasswordInput.value = '';
-                signupConfirmPasswordInput.value = '';
-                return;
+                
+                navShowPage('page-login');
+                
+            } catch (error) {
+                console.error('Error signing up:', error.message);
+                alert('Error signing up: ' + error.message);
             }
-
-            const allUsers = getAllUsers();
-            const existingUser = allUsers.find(u => u.username === username);
-
-            if (existingUser) {
-                alert("This username is already taken. Please choose another one.");
-                return;
-            }
-
-            // Add new user to the array
-            const newUser = { name, location, username, password };
-            allUsers.push(newUser);
-            localStorage.setItem(USERS_KEY, JSON.stringify(allUsers));
-
-            alert("Sign up successful! Please log in.");
-            
-            // Clear fields
-            signupNameInput.value = '';
-            signupLocationInput.value = '';
-            signupUsernameInput.value = '';
-            signupPasswordInput.value = '';
-            signupConfirmPasswordInput.value = '';
-            
-            navShowPage('page-login');
         }
 
-        function handleLogin() {
-            const username = loginUsernameInput.value.trim().toLowerCase();
-            const password = loginPasswordInput.value;
+        async function handleLogin() {
+            try {
+                const email = loginUsernameInput.value;
+                const password = loginPasswordInput.value;
 
-            if (!username || !password) {
-                alert("Please enter both username and password.");
-                return;
-            }
+                if (!email || !password) {
+                    alert("Please enter both email and password.");
+                    return;
+                }
 
-            const allUsers = getAllUsers();
-            if (allUsers.length === 0) {
-                 alert("No user accounts found. Please sign up first.");
-                 navShowPage('page-signup');
-                 return;
-            }
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
 
-            const user = allUsers.find(u => u.username === username);
+                if (error) throw error;
 
-            if (user && user.password === password) {
-                // Login successful! Store the username in the session.
-                sessionStorage.setItem(CURRENT_USER_KEY, user.username);
+                // Login successful
+                currentUser = data.user;
                 loginUsernameInput.value = '';
                 loginPasswordInput.value = '';
                 
-                loadData(); // Load this user's data
+                await loadData();
                 navShowPage('page-dashboard');
-            } else {
-                // Login failed
-                alert("Invalid username or password.");
+                
+            } catch (error) {
+                console.error('Error logging in:', error.message);
+                alert('Error logging in: ' + error.message);
             }
         }
 
-        function handleLogout() {
-            sessionStorage.removeItem(CURRENT_USER_KEY); // Clear the session
-            navShowPage('page-login');
+        async function handleLogout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                currentUser = null;
+                navShowPage('page-login');
+                
+            } catch (error) {
+                console.error('Error logging out:', error.message);
+                alert('Error logging out: ' + error.message);
+            }
         }
 
 
-        // --- DATA & CALCULATION FUNCTIONS (UPDATED FOR PER-USER) ---
+        // --- NEW: DATA & CALCULATION FUNCTIONS (SUPABASE) ---
 
-        function getTarget() {
-            const key = getDynamicTargetKey();
-            if (!key) return 0; // Not logged in
-            return parseFloat(localStorage.getItem(key)) || 0;
+        async function getTarget() {
+            if (!currentUser) return 0; // Not logged in
+
+            try {
+                // Fetch the target for the current user
+                const { data, error } = await supabase
+                    .from('targets')
+                    .select('monthly_target')
+                    .eq('user_id', currentUser.id)
+                    .single(); // We only expect one row
+                
+                if (error && error.code !== 'PGRST116') throw error; // PGRST116 = "no rows found"
+                if (!data) return 0;
+                
+                return data.monthly_target;
+                
+            } catch (error) {
+                console.error('Error fetching target:', error.message);
+                return 0;
+            }
         }
 
-        function getSalesList() {
-            const key = getDynamicSalesListKey();
-            if (!key) return []; // Not logged in
-            const listJSON = localStorage.getItem(key);
-            return listJSON ? JSON.parse(listJSON) : [];
+        async function getSalesList() {
+            if (!currentUser) return []; // Not logged in
+            
+            try {
+                // Fetch all sales for the current user, ordered by date
+                const { data, error } = await supabase
+                    .from('sales')
+                    .select('*') // Get all columns
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+                return data || [];
+                
+            } catch (error) {
+                console.error('Error fetching sales list:', error.message);
+                return [];
+            }
         }
 
-        function loadData() {
-            const target = getTarget();
-            const salesList = getSalesList();
-
+        async function loadData() {
+            const target = await getTarget();
+            const salesList = await getSalesList();
+            
             let totalSales = 0;
             let totalDevices = 0;
             let totalLeads = 0;
+            
             for (const sale of salesList) {
-                totalSales += (sale.sales || 0);
+                totalSales += (sale.revenue || 0);
                 totalDevices += (sale.devices || 0);
                 totalLeads += (sale.leads || 0);
             }
@@ -600,10 +622,10 @@
                 <div class="relative">
                     <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md pr-10">
                         <p class="text-text-primary-dark text-base font-medium leading-normal">Day ${index + 1}</p>
-                        <p class="text-primary text-xl font-bold">${formatLKR(sale.sales)}</p>
+                        <p class="text-primary text-xl font-bold">${formatLKR(sale.revenue)}</p>
                         <p class="text-text-secondary-dark text-sm">${formatNumber(sale.devices)} devices, ${formatNumber(sale.leads)} leads</p>
                     </div>
-                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-index="${index}" onclick="handleEditSaleClick(event)">
+                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-id="${sale.id}" data-revenue="${sale.revenue}" data-devices="${sale.devices}" data-leads="${sale.leads}" onclick="handleEditSaleClick(event)">
                         <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
                     </button>
                 </div>
@@ -618,44 +640,52 @@
             `;
 
             dailySalesContainer.innerHTML = html;
-            
-            // Re-attach listeners for standard nav buttons
             attachNavButtonListeners();
         }
         
-        function saveTarget() {
-            const key = getDynamicTargetKey();
-            if (!key) {
-                alert("Error: Not logged in.");
-                return;
-            }
-            const newTarget = parseFloat(editTargetInput.value) || 0;
-            localStorage.setItem(key, newTarget);
+        async function saveTarget() {
+            if (!currentUser) return alert("Error: Not logged in.");
             
-            editTargetInput.value = '';
-            loadData();
-            navShowPage('page-menu');
+            try {
+                const newTarget = parseFloat(editTargetInput.value) || 0;
+                
+                // 'upsert' means UPDATE if it exists, or INSERT if it doesn't.
+                // We use 'user_id' as the conflict check, since it's unique.
+                const { error } = await supabase
+                    .from('targets')
+                    .upsert({ 
+                        user_id: currentUser.id, 
+                        monthly_target: newTarget 
+                    }, { onConflict: 'user_id' });
+
+                if (error) throw error;
+                
+                editTargetInput.value = '';
+                await loadData();
+                navShowPage('page-menu');
+                
+            } catch (error) {
+                console.error('Error saving target:', error.message);
+                alert('Error saving target: ' + error.message);
+            }
         }
 
-        function openEditPage(index) {
-            const salesList = getSalesList();
-            const saleToEdit = salesList[index];
-            if (!saleToEdit) return;
-            currentlyEditingIndex = index;
+        function openEditPage(id, revenue, devices, leads) {
+            currentlyEditingSaleId = id; // Store the database ID
 
-            addSaleHeader.textContent = `Edit Day ${index + 1}`;
+            addSaleHeader.textContent = `Edit Sale Entry`;
             btnSaveSale.textContent = 'Save Changes';
             deleteSaleSection.style.display = 'block';
 
-            addSaleDevicesInput.value = saleToEdit.devices;
-            addSaleRevenueInput.value = saleToEdit.sales;
-            addSaleLeadsInput.value = saleToEdit.leads;
+            addSaleDevicesInput.value = devices;
+            addSaleRevenueInput.value = revenue;
+            addSaleLeadsInput.value = leads;
 
             navShowPage('page-add-sale');
         }
 
         function resetAddSalePage() {
-            currentlyEditingIndex = null;
+            currentlyEditingSaleId = null; // Clear the ID
             addSaleHeader.textContent = 'Add Daily Sale';
             btnSaveSale.textContent = 'Add Sale';
             deleteSaleSection.style.display = 'none';
@@ -665,74 +695,105 @@
             addSaleLeadsInput.value = '';
         }
 
-        function saveDailySale() {
-            const key = getDynamicSalesListKey();
-            if (!key) {
-                alert("Error: Not logged in.");
-                return;
-            }
+        async function saveDailySale() {
+            if (!currentUser) return alert("Error: Not logged in.");
             
-            const newSales = parseFloat(addSaleRevenueInput.value) || 0;
+            const newRevenue = parseFloat(addSaleRevenueInput.value) || 0;
             const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
             const newLeads = parseFloat(addSaleLeadsInput.value) || 0;
-            
-            const salesList = getSalesList();
 
-            if (currentlyEditingIndex !== null) {
-                // --- EDIT MODE ---
-                salesList[currentlyEditingIndex] = {
-                    sales: newSales,
-                    devices: newDevices,
-                    leads: newLeads
-                };
-            } else {
-                // --- ADD MODE ---
-                if (newSales === 0 && newDevices === 0 && newLeads === 0) {
-                    navShowPage('page-dashboard');
-                    return;
+            try {
+                if (currentlyEditingSaleId) {
+                    // --- EDIT MODE ---
+                    const { error } = await supabase
+                        .from('sales')
+                        .update({ 
+                            revenue: newRevenue, 
+                            devices: newDevices, 
+                            leads: newLeads 
+                        })
+                        .eq('id', currentlyEditingSaleId); // Find the sale by its ID
+
+                    if (error) throw error;
+                    
+                } else {
+                    // --- ADD MODE ---
+                    if (newRevenue === 0 && newDevices === 0 && newLeads === 0) {
+                        navShowPage('page-dashboard');
+                        return;
+                    }
+                    
+                    const { error } = await supabase
+                        .from('sales')
+                        .insert({ 
+                            user_id: currentUser.id,
+                            revenue: newRevenue, 
+                            devices: newDevices, 
+                            leads: newLeads 
+                        });
+                        
+                    if (error) throw error;
                 }
-                salesList.push({
-                    sales: newSales,
-                    devices: newDevices,
-                    leads: newLeads
-                });
-            }
-
-            localStorage.setItem(key, JSON.stringify(salesList));
-            resetAddSalePage();
-            loadData();
-            navShowPage('page-dashboard');
-        }
-
-        function deleteSale() {
-            const key = getDynamicSalesListKey();
-            if (!key) {
-                alert("Error: Not logged in.");
-                return;
-            }
-            
-            if (currentlyEditingIndex === null) return;
-            if (confirm("Are you sure you want to delete this sales entry?")) {
-                const salesList = getSalesList();
-                salesList.splice(currentlyEditingIndex, 1);
-                localStorage.setItem(key, JSON.stringify(salesList));
                 
                 resetAddSalePage();
-                loadData();
+                await loadData();
                 navShowPage('page-dashboard');
+                
+            } catch (error) {
+                console.error('Error saving sale:', error.message);
+                alert('Error saving sale: ' + error.message);
             }
         }
 
-        function resetData() {
-            if (confirm("Are you sure you want to delete all your data? This is for starting a new month.")) {
-                const targetKey = getDynamicTargetKey();
-                const salesKey = getDynamicSalesListKey();
-                
-                if (targetKey) localStorage.removeItem(targetKey);
-                if (salesKey) localStorage.removeItem(salesKey);
-                
-                loadData();
-                navShowPage('page-dashboard');
+        async function deleteSale() {
+            if (!currentlyEditingSaleId) return;
+            
+            if (confirm("Are you sure you want to delete this sales entry?")) {
+                try {
+                    const { error } = await supabase
+                        .from('sales')
+                        .delete()
+                        .eq('id', currentlyEditingSaleId);
+                    
+                    if (error) throw error;
+                    
+                    resetAddSalePage();
+                    await loadData();
+                    navShowPage('page-dashboard');
+                    
+                } catch (error) {
+                    console.error('Error deleting sale:', error.message);
+                    alert('Error deleting sale: ' + error.message);
+                }
+            }
+        }
+
+        async function resetData() {
+            if (!currentUser) return alert("Error: Not logged in.");
+            
+            if (confirm("Are you sure you want to delete ALL your sales data for this month?")) {
+                try {
+                    // Delete all sales associated with this user
+                    const { error: salesError } = await supabase
+                        .from('sales')
+                        .delete()
+                        .eq('user_id', currentUser.id);
+                    if (salesError) throw salesError;
+
+                    // Reset the user's target to 0
+                    const { error: targetError } = await supabase
+                        .from('targets')
+                        .update({ monthly_target: 0 })
+                        .eq('user_id', currentUser.id);
+                    if (targetError) throw targetError;
+
+                    await loadData();
+                    navShowPage('page-dashboard');
+                    
+                } catch (error) {
+                    console.error('Error resetting data:', error.message);
+                    alert('Error resetting data: ' + error.message);
+                }
             }
         }
 
@@ -741,7 +802,6 @@
         function attachNavButtonListeners() {
             const navButtons = document.querySelectorAll('.nav-button');
             navButtons.forEach(button => {
-                // Remove old one (if any) and add new one
                 button.removeEventListener('click', handleNavClick);
                 button.addEventListener('click', handleNavClick);
             });
@@ -760,12 +820,16 @@
         }
 
         function handleEditSaleClick(event) {
-            const index = parseInt(event.currentTarget.getAttribute('data-index'));
-            openEditPage(index);
+            const button = event.currentTarget;
+            const id = button.getAttribute('data-id');
+            const revenue = button.getAttribute('data-revenue');
+            const devices = button.getAttribute('data-devices');
+            const leads = button.getAttribute('data-leads');
+            openEditPage(id, revenue, devices, leads);
         }
 
        
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             
             // --- Assign all element variables ---
             pages = document.querySelectorAll('.page');
@@ -777,9 +841,8 @@
             // Sign Up Page
             signupNameInput = document.getElementById('signup-name');
             signupLocationInput = document.getElementById('signup-location');
-            signupUsernameInput = document.getElementById('signup-username');
+            signupEmailInput = document.getElementById('signup-email');
             signupPasswordInput = document.getElementById('signup-password');
-            signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
             
             // Dashboard Page
             progressCircle = document.getElementById('progress-circle');
@@ -805,24 +868,29 @@
             editTargetCurrent = document.getElementById('edit-target-current');
             editTargetInput = document.getElementById('edit-target-input');
             
-            // Attach Listeners for standard nav buttons
             attachNavButtonListeners();
 
-            // --- APP STARTUP LOGIC (UPDATED) ---
-            const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
+            // --- APP STARTUP LOGIC (SUPABASE) ---
             
-            if (currentUser) {
-                // User is already logged in
-                loadData();
-                navShowPage('page-dashboard');
-            } 
-            else if (localStorage.getItem(USERS_KEY)) {
-                // App has users, so show login page
+            // 1. Initialize Supabase
+            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            // 2. Check for an active session
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (session) {
+                    // User is already logged in
+                    currentUser = session.user;
+                    await loadData();
+                    navShowPage('page-dashboard');
+                } else {
+                    // No user logged in
+                    navShowPage('page-login');
+                }
+            } catch (error) {
+                console.error('Error checking session:', error.message);
                 navShowPage('page-login');
-            } 
-            else {
-                // First time ever running the app, no users exist
-                navShowPage('page-signup'); 
             }
         });
 
