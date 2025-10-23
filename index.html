@@ -60,7 +60,88 @@
 
 <body class="bg-background-dark font-display">
 
-    <div id="page-dashboard" class="page" style="display: block;"> <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+    <div id="page-login" class="page">
+        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+            <div class="flex w-12 items-center justify-start"></div>
+            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Login</h2>
+            <div class="flex w-12 items-center justify-end"></div>
+        </div>
+        
+        <div class="flex max-w-full flex-col gap-4 px-4 py-3 mt-8">
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username</p>
+                <input id="login-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your username" type="text" value="" />
+            </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
+                <input id="login-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your password" type="password" value="" />
+            </label>
+        </div>
+        
+        <div class="px-4 py-4 mt-4">
+            <button id="btn-login" onclick="handleLogin()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
+                Login
+            </button>
+        </div>
+
+        <div class="text-center px-4 py-2">
+            <p class="text-text-secondary-dark text-sm">
+                Don't have an account? 
+                <span class="text-primary font-medium cursor-pointer" onclick="navShowPage('page-signup')">
+                    Sign Up
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div id="page-signup" class="page">
+        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+            <div class="flex w-12 items-center justify-start"></div>
+            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Create Account</h2>
+            <div class="flex w-12 items-center justify-end"></div>
+        </div>
+        
+        <div class="flex max-w-full flex-col gap-4 px-4 py-3 mt-4">
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Name</p>
+                <input id="signup-name" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your full name" type="text" value="" />
+            </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Location</p>
+                <input id="signup-location" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="e.g., Colombo, Sri Lanka" type="text" value="" />
+            </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username</p>
+                <input id="signup-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a username" type="text" value="" />
+            </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
+                <input id="signup-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a password" type="password" value="" />
+            </label>
+            <label class="flex flex-col flex-1">
+                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Confirm Password</p>
+                <input id="signup-confirm-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Confirm your password" type="password" value="" />
+            </label>
+        </div>
+        
+        <div class="px-4 py-4 mt-4">
+            <button id="btn-signup" onclick="handleSignUp()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
+                Sign Up
+            </button>
+        </div>
+
+        <div class="text-center px-4 py-2 mb-4">
+            <p class="text-text-secondary-dark text-sm">
+                Already have an account? 
+                <span class="text-primary font-medium cursor-pointer" onclick="navShowPage('page-login')">
+                    Login
+                </span>
+            </p>
+        </div>
+    </div>
+
+
+    <div id="page-dashboard" class="page"> <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div id="btn-open-menu" onclick="navShowPage('page-menu')" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">menu</span>
             </div>
@@ -167,6 +248,14 @@
                     <p class="text-text-secondary-dark text-sm font-normal leading-normal">View developer information.</p>
                 </div>
                 <span class="material-symbols-outlined text-text-secondary-dark">info</span>
+            </button>
+
+            <button id="btn-logout" onclick="handleLogout()" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
+                <div class="flex flex-col gap-1 text-left">
+                    <p class="text-text-primary-dark text-base font-bold leading-tight">Logout</p>
+                    <p class="text-text-secondary-dark text-sm font-normal leading-normal">End your current session.</p>
+                </div>
+                <span class="material-symbols-outlined text-text-secondary-dark">logout</span>
             </button>
 
             <button id="btn-reset-data" onclick="resetData()" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
@@ -310,15 +399,31 @@
         // --- LOCALSTORAGE KEYS ---
         const TARGET_KEY = 'salesApp_target';
         const SALES_LIST_KEY = 'salesApp_dailySales';
+        const USER_KEY = 'salesApp_user'; // NEW: For user account
+        
+        // --- SESSIONSTORAGE KEY ---
+        const LOGGED_IN_KEY = 'salesApp_isLoggedIn'; // NEW: For session
 
         // --- GLOBAL VARIABLES ---
         let pages;
+        
+        // Login Page
+        let loginUsernameInput, loginPasswordInput;
+
+        // Sign Up Page
+        let signupNameInput, signupLocationInput, signupUsernameInput, signupPasswordInput, signupConfirmPasswordInput;
+
+        // Dashboard Page
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
         let progressRemaining, progressDevicesTotal, progressLeadsTotal;
         let dailySalesContainer, milestone50, milestone70;
+        
+        // Add/Edit Sale Page
         let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput;
+        let btnSaveSale, deleteSaleSection;
+        
+        // Edit Target Page
         let editTargetCurrent, editTargetInput;
-        let deleteSaleSection;
         
         let currentlyEditingIndex = null;
 
@@ -334,6 +439,81 @@
             });
             window.scrollTo(0, 0);
         }
+
+        // --- NEW: AUTHENTICATION FUNCTIONS ---
+
+        function handleSignUp() {
+            const name = signupNameInput.value;
+            const location = signupLocationInput.value;
+            const username = signupUsernameInput.value;
+            const password = signupPasswordInput.value;
+            const confirmPassword = signupConfirmPasswordInput.value;
+
+            if (!name || !location || !username || !password || !confirmPassword) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match. Please try again.");
+                signupPasswordInput.value = '';
+                signupConfirmPasswordInput.value = '';
+                return;
+            }
+
+            // NOTE: Storing password in plain text. Only safe for a local-only app.
+            const user = { name, location, username, password };
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+
+            alert("Sign up successful! Please log in.");
+            
+            // Clear fields
+            signupNameInput.value = '';
+            signupLocationInput.value = '';
+            signupUsernameInput.value = '';
+            signupPasswordInput.value = '';
+            signupConfirmPasswordInput.value = '';
+            
+            navShowPage('page-login');
+        }
+
+        function handleLogin() {
+            const username = loginUsernameInput.value;
+            const password = loginPasswordInput.value;
+
+            if (!username || !password) {
+                alert("Please enter both username and password.");
+                return;
+            }
+
+            const userJSON = localStorage.getItem(USER_KEY);
+            if (!userJSON) {
+                alert("No user account found. Please sign up first.");
+                navShowPage('page-signup');
+                return;
+            }
+
+            const user = JSON.parse(userJSON);
+
+            if (username === user.username && password === user.password) {
+                // Login successful!
+                sessionStorage.setItem(LOGGED_IN_KEY, 'true');
+                loginUsernameInput.value = '';
+                loginPasswordInput.value = '';
+                
+                loadData(); // Load data *after* logging in
+                navShowPage('page-dashboard');
+            } else {
+                // Login failed
+                alert("Invalid username or password.");
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem(LOGGED_IN_KEY);
+            navShowPage('page-login');
+        }
+
 
         // --- DATA & CALCULATION FUNCTIONS ---
 
@@ -498,6 +678,7 @@
 
         function resetData() {
             if (confirm("Are you sure you want to delete all data? This is for starting a new month.")) {
+                // We keep the user account, but clear the sales data
                 localStorage.removeItem(TARGET_KEY);
                 localStorage.removeItem(SALES_LIST_KEY);
                 loadData();
@@ -536,8 +717,21 @@
        
         document.addEventListener('DOMContentLoaded', () => {
             
-            // Assign all element variables
+            // --- Assign all element variables ---
             pages = document.querySelectorAll('.page');
+            
+            // Login Page
+            loginUsernameInput = document.getElementById('login-username');
+            loginPasswordInput = document.getElementById('login-password');
+
+            // Sign Up Page
+            signupNameInput = document.getElementById('signup-name');
+            signupLocationInput = document.getElementById('signup-location');
+            signupUsernameInput = document.getElementById('signup-username');
+            signupPasswordInput = document.getElementById('signup-password');
+            signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+            
+            // Dashboard Page
             progressCircle = document.getElementById('progress-circle');
             progressPercent = document.getElementById('progress-percent');
             progressTarget = document.getElementById('progress-target');
@@ -548,23 +742,36 @@
             dailySalesContainer = document.getElementById('daily-sales-container');
             milestone50 = document.getElementById('milestone-50');
             milestone70 = document.getElementById('milestone-70');
+            
+            // Add/Edit Sale Page
             addSaleHeader = document.getElementById('add-sale-header');
             addSaleDevicesInput = document.getElementById('add-sale-devices');
             addSaleRevenueInput = document.getElementById('add-sale-revenue');
             addSaleLeadsInput = document.getElementById('add-sale-leads');
             btnSaveSale = document.getElementById('btn-save-sale');
             deleteSaleSection = document.getElementById('delete-sale-section');
+            
+            // Edit Target Page
             editTargetCurrent = document.getElementById('edit-target-current');
             editTargetInput = document.getElementById('edit-target-input');
             
             // Attach Listeners for standard nav buttons
             attachNavButtonListeners();
 
-            // Load Data on Startup
-            loadData();
-            
-            // Show the dashboard by default
-            navShowPage('page-dashboard'); 
+            // --- NEW: APP STARTUP LOGIC ---
+            // Check if user is already logged in (session active)
+            if (sessionStorage.getItem(LOGGED_IN_KEY) === 'true') {
+                loadData();
+                navShowPage('page-dashboard');
+            } 
+            // Check if a user account exists at all
+            else if (localStorage.getItem(USER_KEY)) {
+                navShowPage('page-login'); // User exists, show login
+            } 
+            // First time running the app
+            else {
+                navShowPage('page-signup'); // No user, force sign up
+            }
         });
 
     </script>
