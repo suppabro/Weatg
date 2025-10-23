@@ -44,12 +44,6 @@
         .progress-circle-anim {
             transition: stroke-dashoffset 1s ease-out;
         }
-        .page {
-            display: none;
-        }
-        .page-active {
-            display: block;
-        }
         .material-symbols-outlined {
             font-variation-settings:
             'FILL' 0,
@@ -62,7 +56,7 @@
 
 <body class="bg-background-dark font-display">
 
-    <div id="page-dashboard" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
+    <div id="page-dashboard" class="page" style="display: block;">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div id="btn-open-menu" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <span class="material-symbols-outlined text-white" style="font-size: 24px;">menu</span>
@@ -144,7 +138,7 @@
     </div>
 
 
-    <div id="page-menu" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
+    <div id="page-menu" class="page" style="display: none;">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <button class="nav-button text-white" data-page="page-dashboard">
@@ -183,7 +177,7 @@
     </div>
 
 
-    <div id="page-add-sale" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
+    <div id="page-add-sale" class="page" style="display: none;">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start">
                 <button class="nav-button text-white" data-page="page-dashboard">
@@ -217,7 +211,7 @@
     </div>
 
 
-    <div id="page-edit-target" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark">
+    <div id="page-edit-target" class="page" style="display: none;">
         <header class="flex items-center justify-between bg-card-dark p-4 pb-2">
             <button class="nav-button flex size-12 shrink-0 items-center justify-start text-white" data-page="page-menu">
                 <span class="material-symbols-outlined">close</span>
@@ -253,7 +247,7 @@
     </div>
 
 
-    <div id="page-about" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
+    <div id="page-about" class="page" style="display: none;">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <button class="nav-button text-white flex size-12 shrink-0 items-center justify-center" data-page="page-menu">
                 <span class="material-symbols-outlined">arrow_back</span>
@@ -311,19 +305,11 @@
         // --- DEFINE ELEMENT VARIABLES ---
         let pages;
         let btnOpenMenu;
-        
-        // Page: Dashboard
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
         let progressRemaining, progressDevicesTotal, progressLeadsTotal;
         let dailySalesContainer, milestone50, milestone70, btnRefresh;
-        
-        // Page: Add Sale
         let addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput, btnSaveSale;
-
-        // Page: Edit Target
         let editTargetCurrent, editTargetInput, btnSaveTarget;
-        
-        // Page: Menu
         let btnResetData;
 
         // --- UTILITY FUNCTIONS ---
@@ -331,12 +317,17 @@
         const formatNumber = (num) => (num || 0).toLocaleString('en-US');
         const formatLKR = (num) => `${formatNumber(num)} LKR`;
         
+        /**
+         * JAVASCRIPT FIX:
+         * This function now uses inline 'style.display' which is more
+         * reliable than adding/removing classes.
+         */
         function navShowPage(pageId) {
             pages.forEach(page => {
                 if (page.id === pageId) {
-                    page.classList.add('page-active');
+                    page.style.display = 'block';
                 } else {
-                    page.classList.remove('page-active');
+                    page.style.display = 'none';
                 }
             });
             window.scrollTo(0, 0);
@@ -474,11 +465,11 @@
             }
         }
 
-        // --- INITIALIZE THE APP ---
+       
         document.addEventListener('DOMContentLoaded', () => {
             
             // Assign all element variables
-            pages = document.querySelectorAll('.page');
+            pages = document.querySelectorAll('.page'); // This now finds all 5 pages
             btnOpenMenu = document.getElementById('btn-open-menu');
             progressCircle = document.getElementById('progress-circle');
             progressPercent = document.getElementById('progress-percent');
@@ -509,13 +500,15 @@
             btnRefresh.addEventListener('click', loadData);
             btnSaveSale.addEventListener('click', saveDailySale);
             btnSaveTarget.addEventListener('click', saveTarget);
+Examples
             btnResetData.addEventListener('click', resetData);
 
             // Load Data on Startup
             loadData();
             
             // Show the dashboard by default
-            navShowPage('page-dashboard');
+            // This is no longer needed as it's set by default in the HTML
+            // navShowPage('page-dashboard'); 
         });
 
     </script>
