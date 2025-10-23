@@ -21,6 +21,8 @@
                         "card-border": "#366348",
                         "text-primary-dark": "#ffffff",
                         "text-secondary-dark": "#96c5a9",
+                        "danger": "#f44336",
+                        "danger-light": "#3f2423"
                     },
                     fontFamily: {
                         "display": ["Manrope", "sans-serif"]
@@ -44,6 +46,10 @@
         .progress-circle-anim {
             transition: stroke-dashoffset 1s ease-out;
         }
+        /* This is the new page navigation system */
+        .page {
+            display: none; /* All pages are hidden by default */
+        }
         .material-symbols-outlined {
             font-variation-settings:
             'FILL' 0,
@@ -56,8 +62,7 @@
 
 <body class="bg-background-dark font-display">
 
-    <div id="page-dashboard" class="page" style="display: block;">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+    <div id="page-dashboard" class="page" style="display: block;"> <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div id="btn-open-menu" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <span class="material-symbols-outlined text-white" style="font-size: 24px;">menu</span>
             </div>
@@ -138,7 +143,7 @@
     </div>
 
 
-    <div id="page-menu" class="page" style="display: none;">
+    <div id="page-menu" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <button class="nav-button text-white" data-page="page-dashboard">
@@ -177,14 +182,14 @@
     </div>
 
 
-    <div id="page-add-sale" class="page" style="display: none;">
+    <div id="page-add-sale" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <div class="flex size-12 shrink-0 items-center justify-start">
                 <button class="nav-button text-white" data-page="page-dashboard">
                     <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
                 </button>
             </div>
-            <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Add Daily Sale</h2>
+            <h2 id="add-sale-header" class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Add Daily Sale</h2>
             <div class="flex w-12 items-center justify-end"></div>
         </div>
 
@@ -208,10 +213,16 @@
                 Add Sale
             </button>
         </div>
+
+        <div id="delete-sale-section" class="px-4 py-2" style="display: none;">
+            <button id="btn-delete-sale" class="w-full bg-danger-light text-danger font-bold py-3 px-4 rounded-lg hover:bg-danger hover:text-white focus:outline-none">
+                Delete This Entry
+            </button>
+        </div>
     </div>
 
 
-    <div id="page-edit-target" class="page" style="display: none;">
+    <div id="page-edit-target" class="page">
         <header class="flex items-center justify-between bg-card-dark p-4 pb-2">
             <button class="nav-button flex size-12 shrink-0 items-center justify-start text-white" data-page="page-menu">
                 <span class="material-symbols-outlined">close</span>
@@ -247,7 +258,7 @@
     </div>
 
 
-    <div id="page-about" class="page" style="display: none;">
+    <div id="page-about" class="page">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
             <button class="nav-button text-white flex size-12 shrink-0 items-center justify-center" data-page="page-menu">
                 <span class="material-symbols-outlined">arrow_back</span>
@@ -302,33 +313,29 @@
         const TARGET_KEY = 'salesApp_target';
         const SALES_LIST_KEY = 'salesApp_dailySales';
 
-        // --- DEFINE ELEMENT VARIABLES ---
+        // --- GLOBAL VARIABLES ---
         let pages;
         let btnOpenMenu;
         let progressCircle, progressPercent, progressTarget, progressSalesTotal;
         let progressRemaining, progressDevicesTotal, progressLeadsTotal;
         let dailySalesContainer, milestone50, milestone70, btnRefresh;
-        let addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput, btnSaveSale;
+        let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput, btnSaveSale;
         let editTargetCurrent, editTargetInput, btnSaveTarget;
-        let btnResetData;
+        let btnResetData, deleteSaleSection, btnDeleteSale;
+        
+        /** This keeps track of which sale index we are editing. null = new sale */
+        let currentlyEditingIndex = null;
 
         // --- UTILITY FUNCTIONS ---
         
         const formatNumber = (num) => (num || 0).toLocaleString('en-US');
         const formatLKR = (num) => `${formatNumber(num)} LKR`;
         
-        /**
-         * JAVASCRIPT FIX:
-         * This function now uses inline 'style.display' which is more
-         * reliable than adding/removing classes.
-         */
+        /** Shows a page and hides all others */
         function navShowPage(pageId) {
             pages.forEach(page => {
-                if (page.id === pageId) {
-                    page.style.display = 'block';
-                } else {
-                    page.style.display = 'none';
-                }
+                // Use inline style for reliable show/hide
+                page.style.display = (page.id === pageId) ? 'block' : 'none';
             });
             window.scrollTo(0, 0);
         }
@@ -344,6 +351,7 @@
             return listJSON ? JSON.parse(listJSON) : [];
         }
 
+        /** This is the main function. It loads all data and updates the UI. */
         function loadData() {
             const target = getTarget();
             const salesList = getSalesList();
@@ -380,30 +388,40 @@
             editTargetCurrent.textContent = formatLKR(target);
         }
 
+        /** Renders the horizontal list of daily sales cards */
         function renderDailySales(salesList) {
             let html = '';
             
             salesList.forEach((sale, index) => {
+                // NEW: Added a wrapper 'div' and an 'edit' button
                 html += `
-                <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md">
-                    <p class="text-white text-base font-medium leading-normal">Day ${index + 1}</p>
-                    <p class="text-primary text-xl font-bold">${formatLKR(sale.sales)}</p>
-                    <p class="text-text-secondary-dark text-sm">${formatNumber(sale.devices)} devices, ${formatNumber(sale.leads)} leads</p>
+                <div class="relative">
+                    <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md pr-10">
+                        <p class="text-white text-base font-medium leading-normal">Day ${index + 1}</p>
+                        <p class="text-primary text-xl font-bold">${formatLKR(sale.sales)}</p>
+                        <p class="text-text-secondary-dark text-sm">${formatNumber(sale.devices)} devices, ${formatNumber(sale.leads)} leads</p>
+                    </div>
+                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-index="${index}">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                    </button>
                 </div>
                 `;
             });
 
             html += `
-            <button data-page="page-add-sale" class="nav-button flex h-full flex-1 flex-col items-center justify-center gap-2 rounded-lg min-w-40 bg-card-dark/50 p-4 border-2 border-dashed border-card-border">
+            <button data-page="page-add-sale" class="nav-button-add flex h-full flex-1 flex-col items-center justify-center gap-2 rounded-lg min-w-40 bg-card-dark/50 p-4 border-2 border-dashed border-card-border">
                 <span class="material-symbols-outlined text-text-secondary-dark" style="font-size: 32px;">add</span>
                 <p class="text-text-secondary-dark text-base font-medium leading-normal">Add Sale</p>
             </button>
             `;
 
             dailySalesContainer.innerHTML = html;
+            
+            // Re-attach listeners for ALL navigation buttons
             attachNavButtonListeners();
         }
         
+        /** Saves the new monthly target */
         function saveTarget() {
             const newTarget = parseFloat(editTargetInput.value) || 0;
             localStorage.setItem(TARGET_KEY, newTarget);
@@ -413,34 +431,102 @@
             navShowPage('page-menu');
         }
 
+        /** NEW: Prepares the "Add Sale" page for editing */
+        function openEditPage(index) {
+            const salesList = getSalesList();
+            const saleToEdit = salesList[index];
+
+            if (!saleToEdit) return; // Safety check
+
+            currentlyEditingIndex = index; // Set global index
+
+            // Update page title and button
+            addSaleHeader.textContent = `Edit Day ${index + 1}`;
+            btnSaveSale.textContent = 'Save Changes';
+            
+            // Show the delete button
+            deleteSaleSection.style.display = 'block';
+
+            // Fill inputs with existing data
+            addSaleDevicesInput.value = saleToEdit.devices;
+            addSaleRevenueInput.value = saleToEdit.sales;
+            addSaleLeadsInput.value = saleToEdit.leads;
+
+            // Go to the page
+            navShowPage('page-add-sale');
+        }
+
+        /** NEW: Resets the "Add Sale" page to its default state */
+        function resetAddSalePage() {
+            currentlyEditingIndex = null; // Clear index
+
+            // Reset title and button
+            addSaleHeader.textContent = 'Add Daily Sale';
+            btnSaveSale.textContent = 'Add Sale';
+
+            // Hide delete button
+            deleteSaleSection.style.display = 'none';
+
+            // Clear inputs
+            addSaleRevenueInput.value = '';
+            addSaleDevicesInput.value = '';
+            addSaleLeadsInput.value = '';
+        }
+
+        /** MODIFIED: Now handles both ADDING and EDITING */
         function saveDailySale() {
             const newSales = parseFloat(addSaleRevenueInput.value) || 0;
             const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
             const newLeads = parseFloat(addSaleLeadsInput.value) || 0;
             
-            if (newSales === 0 && newDevices === 0 && newLeads === 0) {
-                navShowPage('page-dashboard');
-                return;
+            const salesList = getSalesList();
+
+            if (currentlyEditingIndex !== null) {
+                // --- EDIT MODE ---
+                const index = currentlyEditingIndex;
+                salesList[index] = {
+                    sales: newSales,
+                    devices: newDevices,
+                    leads: newLeads
+                };
+
+            } else {
+                // --- ADD MODE ---
+                if (newSales === 0 && newDevices === 0 && newLeads === 0) {
+                    navShowPage('page-dashboard');
+                    return;
+                }
+                salesList.push({
+                    sales: newSales,
+                    devices: newDevices,
+                    leads: newLeads
+                });
             }
 
-            const salesList = getSalesList();
-            
-            salesList.push({
-                sales: newSales,
-                devices: newDevices,
-                leads: newLeads
-            });
-
+            // Save updated list
             localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
 
-            addSaleRevenueInput.value = '';
-            addSaleDevicesInput.value = '';
-            addSaleLeadsInput.value = '';
-
+            resetAddSalePage(); // Reset the form
             loadData();
             navShowPage('page-dashboard');
         }
 
+        /** NEW: Deletes a sale entry */
+        function deleteSale() {
+            if (currentlyEditingIndex === null) return; // Safety check
+
+            if (confirm("Are you sure you want to delete this sales entry?")) {
+                const salesList = getSalesList();
+                salesList.splice(currentlyEditingIndex, 1); // Remove the item
+                localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList)); // Save
+                
+                resetAddSalePage();
+                loadData();
+                navShowPage('page-dashboard');
+            }
+        }
+
+        /** FIXED: This function now works */
         function resetData() {
             if (confirm("Are you sure you want to delete all data? This is for starting a new month.")) {
                 localStorage.removeItem(TARGET_KEY);
@@ -450,11 +536,27 @@
             }
         }
 
+        /** Attaches click listeners to all navigation buttons */
         function attachNavButtonListeners() {
+            // Standard page buttons
             const navButtons = document.querySelectorAll('.nav-button');
             navButtons.forEach(button => {
                 button.removeEventListener('click', handleNavClick);
                 button.addEventListener('click', handleNavClick);
+            });
+
+            // "Add Sale" button
+            const addSaleButton = document.querySelector('.nav-button-add');
+            if (addSaleButton) {
+                addSaleButton.removeEventListener('click', handleAddSaleClick);
+                addSaleButton.addEventListener('click', handleAddSaleClick);
+            }
+
+            // NEW: "Edit Sale" buttons
+            const editSaleButtons = document.querySelectorAll('.btn-edit-sale');
+            editSaleButtons.forEach(button => {
+                button.removeEventListener('click', handleEditSaleClick);
+                button.addEventListener('click', handleEditSaleClick);
             });
         }
         
@@ -465,11 +567,21 @@
             }
         }
 
+        function handleAddSaleClick() {
+            resetAddSalePage(); // Make sure form is in "add" mode
+            navShowPage('page-add-sale');
+        }
+
+        function handleEditSaleClick(event) {
+            const index = parseInt(event.currentTarget.getAttribute('data-index'));
+            openEditPage(index);
+        }
+
        
         document.addEventListener('DOMContentLoaded', () => {
             
             // Assign all element variables
-            pages = document.querySelectorAll('.page'); // This now finds all 5 pages
+            pages = document.querySelectorAll('.page');
             btnOpenMenu = document.getElementById('btn-open-menu');
             progressCircle = document.getElementById('progress-circle');
             progressPercent = document.getElementById('progress-percent');
@@ -482,13 +594,19 @@
             milestone50 = document.getElementById('milestone-50');
             milestone70 = document.getElementById('milestone-70');
             btnRefresh = document.getElementById('btn-refresh');
+            
+            addSaleHeader = document.getElementById('add-sale-header');
             addSaleDevicesInput = document.getElementById('add-sale-devices');
             addSaleRevenueInput = document.getElementById('add-sale-revenue');
             addSaleLeadsInput = document.getElementById('add-sale-leads');
             btnSaveSale = document.getElementById('btn-save-sale');
+            deleteSaleSection = document.getElementById('delete-sale-section');
+            btnDeleteSale = document.getElementById('btn-delete-sale');
+            
             editTargetCurrent = document.getElementById('edit-target-current');
             editTargetInput = document.getElementById('edit-target-input');
             btnSaveTarget = document.getElementById('btn-save-target');
+            
             btnResetData = document.getElementById('btn-reset-data');
 
             
@@ -499,16 +617,18 @@
             // Attach Listeners for Actions
             btnRefresh.addEventListener('click', loadData);
             btnSaveSale.addEventListener('click', saveDailySale);
+This is a test.
+            btnDeleteSale.addEventListener('click', deleteSale); // NEW
             btnSaveTarget.addEventListener('click', saveTarget);
-Examples
+            
+            // FIXED: Removed the typo before this line
             btnResetData.addEventListener('click', resetData);
 
             // Load Data on Startup
             loadData();
             
             // Show the dashboard by default
-            // This is no longer needed as it's set by default in the HTML
-            // navShowPage('page-dashboard'); 
+            navShowPage('page-dashboard'); 
         });
 
     </script>
