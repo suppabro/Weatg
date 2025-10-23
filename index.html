@@ -397,12 +397,10 @@
 
     <script>
         // --- LOCALSTORAGE KEYS ---
-        const TARGET_KEY = 'salesApp_target';
-        const SALES_LIST_KEY = 'salesApp_dailySales';
-        const USER_KEY = 'salesApp_user'; // NEW: For user account
-        
+        const USERS_KEY = 'salesApp_users'; // Stores an array of all user objects
+
         // --- SESSIONSTORAGE KEY ---
-        const LOGGED_IN_KEY = 'salesApp_isLoggedIn'; // NEW: For session
+        const CURRENT_USER_KEY = 'salesApp_currentUserSession'; // Stores the *username* of the logged-in user
 
         // --- GLOBAL VARIABLES ---
         let pages;
@@ -440,12 +438,32 @@
             window.scrollTo(0, 0);
         }
 
-        // --- NEW: AUTHENTICATION FUNCTIONS ---
+        // --- NEW: DYNAMIC KEY FUNCTIONS (FOR PER-USER DATA) ---
+
+        function getDynamicTargetKey() {
+            const username = sessionStorage.getItem(CURRENT_USER_KEY);
+            if (!username) return null;
+            return `salesApp_target_${username}`;
+        }
+
+        function getDynamicSalesListKey() {
+            const username = sessionStorage.getItem(CURRENT_USER_KEY);
+            if (!username) return null;
+            return `salesApp_dailySales_${username}`;
+        }
+
+
+        // --- NEW: AUTHENTICATION FUNCTIONS (UPDATED) ---
+
+        function getAllUsers() {
+            const usersJSON = localStorage.getItem(USERS_KEY);
+            return usersJSON ? JSON.parse(usersJSON) : [];
+        }
 
         function handleSignUp() {
             const name = signupNameInput.value;
             const location = signupLocationInput.value;
-            const username = signupUsernameInput.value;
+            const username = signupUsernameInput.value.trim().toLowerCase();
             const password = signupPasswordInput.value;
             const confirmPassword = signupConfirmPasswordInput.value;
 
@@ -453,7 +471,6 @@
                 alert("Please fill in all fields.");
                 return;
             }
-
             if (password !== confirmPassword) {
                 alert("Passwords do not match. Please try again.");
                 signupPasswordInput.value = '';
@@ -461,9 +478,18 @@
                 return;
             }
 
-            // NOTE: Storing password in plain text. Only safe for a local-only app.
-            const user = { name, location, username, password };
-            localStorage.setItem(USER_KEY, JSON.stringify(user));
+            const allUsers = getAllUsers();
+            const existingUser = allUsers.find(u => u.username === username);
+
+            if (existingUser) {
+                alert("This username is already taken. Please choose another one.");
+                return;
+            }
+
+            // Add new user to the array
+            const newUser = { name, location, username, password };
+            allUsers.push(newUser);
+            localStorage.setItem(USERS_KEY, JSON.stringify(allUsers));
 
             alert("Sign up successful! Please log in.");
             
@@ -478,7 +504,7 @@
         }
 
         function handleLogin() {
-            const username = loginUsernameInput.value;
+            const username = loginUsernameInput.value.trim().toLowerCase();
             const password = loginPasswordInput.value;
 
             if (!username || !password) {
@@ -486,22 +512,22 @@
                 return;
             }
 
-            const userJSON = localStorage.getItem(USER_KEY);
-            if (!userJSON) {
-                alert("No user account found. Please sign up first.");
-                navShowPage('page-signup');
-                return;
+            const allUsers = getAllUsers();
+            if (allUsers.length === 0) {
+                 alert("No user accounts found. Please sign up first.");
+                 navShowPage('page-signup');
+                 return;
             }
 
-            const user = JSON.parse(userJSON);
+            const user = allUsers.find(u => u.username === username);
 
-            if (username === user.username && password === user.password) {
-                // Login successful!
-                sessionStorage.setItem(LOGGED_IN_KEY, 'true');
+            if (user && user.password === password) {
+                // Login successful! Store the username in the session.
+                sessionStorage.setItem(CURRENT_USER_KEY, user.username);
                 loginUsernameInput.value = '';
                 loginPasswordInput.value = '';
                 
-                loadData(); // Load data *after* logging in
+                loadData(); // Load this user's data
                 navShowPage('page-dashboard');
             } else {
                 // Login failed
@@ -510,19 +536,23 @@
         }
 
         function handleLogout() {
-            sessionStorage.removeItem(LOGGED_IN_KEY);
+            sessionStorage.removeItem(CURRENT_USER_KEY); // Clear the session
             navShowPage('page-login');
         }
 
 
-        // --- DATA & CALCULATION FUNCTIONS ---
+        // --- DATA & CALCULATION FUNCTIONS (UPDATED FOR PER-USER) ---
 
         function getTarget() {
-            return parseFloat(localStorage.getItem(TARGET_KEY)) || 0;
+            const key = getDynamicTargetKey();
+            if (!key) return 0; // Not logged in
+            return parseFloat(localStorage.getItem(key)) || 0;
         }
 
         function getSalesList() {
-            const listJSON = localStorage.getItem(SALES_LIST_KEY);
+            const key = getDynamicSalesListKey();
+            if (!key) return []; // Not logged in
+            const listJSON = localStorage.getItem(key);
             return listJSON ? JSON.parse(listJSON) : [];
         }
 
@@ -594,8 +624,13 @@
         }
         
         function saveTarget() {
+            const key = getDynamicTargetKey();
+            if (!key) {
+                alert("Error: Not logged in.");
+                return;
+            }
             const newTarget = parseFloat(editTargetInput.value) || 0;
-            localStorage.setItem(TARGET_KEY, newTarget);
+            localStorage.setItem(key, newTarget);
             
             editTargetInput.value = '';
             loadData();
@@ -631,6 +666,12 @@
         }
 
         function saveDailySale() {
+            const key = getDynamicSalesListKey();
+            if (!key) {
+                alert("Error: Not logged in.");
+                return;
+            }
+            
             const newSales = parseFloat(addSaleRevenueInput.value) || 0;
             const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
             const newLeads = parseFloat(addSaleLeadsInput.value) || 0;
@@ -657,18 +698,24 @@
                 });
             }
 
-            localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
+            localStorage.setItem(key, JSON.stringify(salesList));
             resetAddSalePage();
             loadData();
             navShowPage('page-dashboard');
         }
 
         function deleteSale() {
+            const key = getDynamicSalesListKey();
+            if (!key) {
+                alert("Error: Not logged in.");
+                return;
+            }
+            
             if (currentlyEditingIndex === null) return;
             if (confirm("Are you sure you want to delete this sales entry?")) {
                 const salesList = getSalesList();
                 salesList.splice(currentlyEditingIndex, 1);
-                localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
+                localStorage.setItem(key, JSON.stringify(salesList));
                 
                 resetAddSalePage();
                 loadData();
@@ -677,10 +724,13 @@
         }
 
         function resetData() {
-            if (confirm("Are you sure you want to delete all data? This is for starting a new month.")) {
-                // We keep the user account, but clear the sales data
-                localStorage.removeItem(TARGET_KEY);
-                localStorage.removeItem(SALES_LIST_KEY);
+            if (confirm("Are you sure you want to delete all your data? This is for starting a new month.")) {
+                const targetKey = getDynamicTargetKey();
+                const salesKey = getDynamicSalesListKey();
+                
+                if (targetKey) localStorage.removeItem(targetKey);
+                if (salesKey) localStorage.removeItem(salesKey);
+                
                 loadData();
                 navShowPage('page-dashboard');
             }
@@ -758,19 +808,21 @@
             // Attach Listeners for standard nav buttons
             attachNavButtonListeners();
 
-            // --- NEW: APP STARTUP LOGIC ---
-            // Check if user is already logged in (session active)
-            if (sessionStorage.getItem(LOGGED_IN_KEY) === 'true') {
+            // --- APP STARTUP LOGIC (UPDATED) ---
+            const currentUser = sessionStorage.getItem(CURRENT_USER_KEY);
+            
+            if (currentUser) {
+                // User is already logged in
                 loadData();
                 navShowPage('page-dashboard');
             } 
-            // Check if a user account exists at all
-            else if (localStorage.getItem(USER_KEY)) {
-                navShowPage('page-login'); // User exists, show login
+            else if (localStorage.getItem(USERS_KEY)) {
+                // App has users, so show login page
+                navShowPage('page-login');
             } 
-            // First time running the app
             else {
-                navShowPage('page-signup'); // No user, force sign up
+                // First time ever running the app, no users exist
+                navShowPage('page-signup'); 
             }
         });
 
