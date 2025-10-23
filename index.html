@@ -289,17 +289,21 @@
             </div>
 
             <div class="display-card">
-                <span>Daily Device Count</span>
+                <span>Total Device Count</span>
                 <strong id="deviceCountDisplay">0</strong>
             </div>
 
             <div class="daily-entry">
-                <h2>Add Daily Sale</h2>
+                <h2>Add Daily Update</h2>
                 <div class="input-group">
                     <label for="dailySaleAmount">New Sale Amount</label>
                     <input type="number" id="dailySaleAmount" placeholder="e.g., 50000">
                 </div>
-                <button id="addSaleButton" class="btn-primary">Add to Current Sales</button>
+                <div class="input-group">
+                    <label for="dailyDeviceAmount">New Device Count</label>
+                    <input type="number" id="dailyDeviceAmount" placeholder="e.g., 10">
+                </div>
+                <button id="addUpdateButton" class="btn-primary">Add Daily Update</button>
             </div>
             
             <div class="results-grid">
@@ -326,12 +330,12 @@
             </div>
 
             <div class="input-group">
-                <label for="deviceCount">Daily Device Count</label>
+                <label for="deviceCount">Total Device Count (Manual Edit)</label>
                 <input type="number" id="deviceCount" placeholder="e.g., 10">
             </div>
 
             <div class="input-group">
-                <label for="nowSales">Current Sales Value (Manual Edit)</label>
+                <label for="nowSales">Total Sales Value (Manual Edit)</label>
                 <input type="number" id="nowSales" placeholder="e.g., 120,000">
             </div>
             
@@ -357,16 +361,18 @@
         // Settings Page Elements
         const monthlyTargetInput = document.getElementById('monthlyTarget');
         const nowSalesInput = document.getElementById('nowSales');
-        const deviceCountInput = document.getElementById('deviceCount'); // New Input
+        const deviceCountInput = document.getElementById('deviceCount');
         const saveButton = document.getElementById('saveButton');
         const resetButton = document.getElementById('resetButton');
         
         // Tracker Page Elements
-        const dailySaleInput = document.getElementById('dailySaleAmount');
-        const addSaleButton = document.getElementById('addSaleButton');
+        const dailySaleUpdateInput = document.getElementById('dailySaleAmount'); // Changed
+        const dailyDeviceUpdateInput = document.getElementById('dailyDeviceAmount'); // New
+        const addUpdateButton = document.getElementById('addUpdateButton'); // Changed
+        
         const progressBar = document.getElementById('progressBar');
         const currentPercentageSpan = document.getElementById('currentPercentage');
-        const deviceCountDisplay = document.getElementById('deviceCountDisplay'); // New Display
+        const deviceCountDisplay = document.getElementById('deviceCountDisplay');
         const to50El = document.getElementById('to50');
         const to70El = document.getElementById('to70');
         const to100El = document.getElementById('to100');
@@ -456,18 +462,29 @@
 
         // --- 6. Action Functions ---
         
-        function addDailySale() {
-            const dailyAmount = parseFloat(dailySaleInput.value) || 0;
-            if (dailyAmount === 0) return;
+        // THIS IS THE NEW FUNCTION
+        function addDailyUpdate() {
+            const saleAmount = parseFloat(dailySaleUpdateInput.value) || 0;
+            const deviceAmount = parseFloat(dailyDeviceUpdateInput.value) || 0;
 
-            const currentTotal = parseFloat(localStorage.getItem(CURRENT_KEY)) || 0;
-            const newTotal = currentTotal + dailyAmount;
+            // If both are empty, do nothing
+            if (saleAmount === 0 && deviceAmount === 0) return;
 
-            // Save the new total
-            localStorage.setItem(CURRENT_KEY, newTotal);
+            // Get current totals from storage
+            const currentSaleTotal = parseFloat(localStorage.getItem(CURRENT_KEY)) || 0;
+            const currentDeviceTotal = parseFloat(localStorage.getItem(DEVICE_COUNT_KEY)) || 0;
 
-            // Clear the daily input box
-            dailySaleInput.value = '';
+            // Calculate new totals
+            const newSaleTotal = currentSaleTotal + saleAmount;
+            const newDeviceTotal = currentDeviceTotal + deviceAmount;
+
+            // Save the new totals
+            localStorage.setItem(CURRENT_KEY, newSaleTotal);
+            localStorage.setItem(DEVICE_COUNT_KEY, newDeviceTotal);
+
+            // Clear the daily input boxes
+            dailySaleUpdateInput.value = '';
+            dailyDeviceUpdateInput.value = '';
 
             // Reload all data to update the UI
             loadData();
@@ -486,12 +503,12 @@
             menuIcon.addEventListener('click', showSettingsPage);
             saveButton.addEventListener('click', () => {
                 saveSettings();
-                loadData(); // Reload data just in case
+                loadData(); // Reload data
                 showTrackerPage();
             });
 
             // Setup Tracker Page Actions
-            addSaleButton.addEventListener('click', addDailySale);
+            addUpdateButton.addEventListener('click', addDailyUpdate); // Changed
 
             // Setup Settings Page Actions
             resetButton.addEventListener('click', resetData);
