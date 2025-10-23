@@ -41,25 +41,15 @@
             background-color: #122017;
             font-family: 'Manrope', "Noto Sans", sans-serif;
         }
-
-        /* Progress Circle Animation */
         .progress-circle-anim {
             transition: stroke-dashoffset 1s ease-out;
         }
-
-        /*
-        This controls the page navigation.
-        We hide all pages by default.
-        The 'page-active' class will be added by JavaScript to show one.
-        */
         .page {
             display: none;
         }
         .page-active {
             display: block;
         }
-
-        /* Material Symbols Outlined default style */
         .material-symbols-outlined {
             font-variation-settings:
             'FILL' 0,
@@ -72,9 +62,9 @@
 
 <body class="bg-background-dark font-display">
 
-    <div id="page-dashboard" class="page page-active relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
+    <div id="page-dashboard" class="page relative flex h-auto min-h-screen w-full flex-col bg-background-dark group/design-root overflow-x-hidden">
         <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div classid="btn-open-menu" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
+            <div id="btn-open-menu" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
                 <span class="material-symbols-outlined text-white" style="font-size: 24px;">menu</span>
             </div>
             <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Sales Dashboard</h2>
@@ -318,36 +308,24 @@
         const TARGET_KEY = 'salesApp_target';
         const SALES_LIST_KEY = 'salesApp_dailySales';
 
-        // --- DOM ELEMENTS ---
-        // Page Containers
-        const pages = document.querySelectorAll('.page');
+        // --- DEFINE ELEMENT VARIABLES ---
+        // We declare them here with 'let' so all functions can access them
+        let pages;
+        let btnOpenMenu;
         
         // Page: Dashboard
-        const progressCircle = document.getElementById('progress-circle');
-        const progressPercent = document.getElementById('progress-percent');
-        const progressTarget = document.getElementById('progress-target');
-        const progressSalesTotal = document.getElementById('progress-sales-total');
-        const progressRemaining = document.getElementById('progress-remaining');
-        const progressDevicesTotal = document.getElementById('progress-devices-total');
-        const progressLeadsTotal = document.getElementById('progress-leads-total');
-        const dailySalesContainer = document.getElementById('daily-sales-container');
-        const milestone50 = document.getElementById('milestone-50');
-        const milestone70 = document.getElementById('milestone-70');
-        const btnRefresh = document.getElementById('btn-refresh');
+        let progressCircle, progressPercent, progressTarget, progressSalesTotal;
+        let progressRemaining, progressDevicesTotal, progressLeadsTotal;
+        let dailySalesContainer, milestone50, milestone70, btnRefresh;
         
         // Page: Add Sale
-        const addSaleDevicesInput = document.getElementById('add-sale-devices');
-        const addSaleRevenueInput = document.getElementById('add-sale-revenue');
-        const addSaleLeadsInput = document.getElementById('add-sale-leads');
-        const btnSaveSale = document.getElementById('btn-save-sale');
+        let addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput, btnSaveSale;
 
         // Page: Edit Target
-        const editTargetCurrent = document.getElementById('edit-target-current');
-        const editTargetInput = document.getElementById('edit-target-input');
-        const btnSaveTarget = document.getElementById('btn-save-target');
+        let editTargetCurrent, editTargetInput, btnSaveTarget;
         
         // Page: Menu
-        const btnResetData = document.getElementById('btn-reset-data');
+        let btnResetData;
 
         // --- UTILITY FUNCTIONS ---
         
@@ -366,7 +344,6 @@
                     page.classList.remove('page-active');
                 }
             });
-            // Scroll to top of the new page
             window.scrollTo(0, 0);
         }
 
@@ -396,9 +373,9 @@
             let totalDevices = 0;
             let totalLeads = 0;
             for (const sale of salesList) {
-                totalSales += sale.sales;
-                totalDevices += sale.devices;
-                totalLeads += sale.leads;
+                totalSales += (sale.sales || 0);
+                totalDevices += (sale.devices || 0);
+                totalLeads += (sale.leads || 0);
             }
 
             // --- 2. Calculate Progress & Milestones ---
@@ -433,15 +410,12 @@
             
             // Update Edit Target Page
             editTargetCurrent.textContent = formatLKR(target);
-
-            console.log("Data loaded and UI updated.");
         }
 
         /** Renders the horizontal list of daily sales cards */
         function renderDailySales(salesList) {
             let html = '';
             
-            // Add a card for each sale
             salesList.forEach((sale, index) => {
                 html += `
                 <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md">
@@ -471,13 +445,8 @@
             const newTarget = parseFloat(editTargetInput.value) || 0;
             localStorage.setItem(TARGET_KEY, newTarget);
             
-            // Clear the input
             editTargetInput.value = '';
-            
-            // Reload all data
             loadData();
-            
-            // Go back to the menu
             navShowPage('page-menu');
         }
 
@@ -487,7 +456,6 @@
             const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
             const newLeads = parseFloat(addSaleLeadsInput.value) || 0;
             
-            // Don't save if all fields are empty
             if (newSales === 0 && newDevices === 0 && newLeads === 0) {
                 navShowPage('page-dashboard');
                 return;
@@ -501,18 +469,13 @@
                 leads: newLeads
             });
 
-            // Save the updated list back to localStorage
             localStorage.setItem(SALES_LIST_KEY, JSON.stringify(salesList));
 
-            // Clear inputs
             addSaleRevenueInput.value = '';
             addSaleDevicesInput.value = '';
             addSaleLeadsInput.value = '';
 
-            // Reload data
             loadData();
-            
-            // Go back to dashboard
             navShowPage('page-dashboard');
         }
 
@@ -521,17 +484,15 @@
             if (confirm("Are you sure you want to delete all data? This is for starting a new month.")) {
                 localStorage.removeItem(TARGET_KEY);
                 localStorage.removeItem(SALES_LIST_KEY);
-                loadData(); // Reload UI (will be empty)
-                navShowPage('page-dashboard'); // Go to dashboard
+                loadData();
+                navShowPage('page-dashboard');
             }
         }
 
         /** Attaches click listeners to all navigation buttons */
         function attachNavButtonListeners() {
-            // Find all buttons with `data-page` attribute
             const navButtons = document.querySelectorAll('.nav-button');
             navButtons.forEach(button => {
-                // We remove old listener to prevent duplicates, then add new one
                 button.removeEventListener('click', handleNavClick);
                 button.addEventListener('click', handleNavClick);
             });
@@ -547,10 +508,42 @@
         // --- INITIALIZE THE APP ---
         document.addEventListener('DOMContentLoaded', () => {
             
+            // --- FIXED: Assign all element variables INSIDE this function ---
+            pages = document.querySelectorAll('.page');
+            btnOpenMenu = document.getElementById('btn-open-menu');
+            
+            // Page: Dashboard
+            progressCircle = document.getElementById('progress-circle');
+            progressPercent = document.getElementById('progress-percent');
+            progressTarget = document.getElementById('progress-target');
+            progressSalesTotal = document.getElementById('progress-sales-total');
+            progressRemaining = document.getElementById('progress-remaining');
+            progressDevicesTotal = document.getElementById('progress-devices-total');
+            progressLeadsTotal = document.getElementById('progress-leads-total');
+            dailySalesContainer = document.getElementById('daily-sales-container');
+            milestone50 = document.getElementById('milestone-50');
+            milestone70 = document.getElementById('milestone-70');
+            btnRefresh = document.getElementById('btn-refresh');
+            
+            // Page: Add Sale
+            addSaleDevicesInput = document.getElementById('add-sale-devices');
+            addSaleRevenueInput = document.getElementById('add-sale-revenue');
+            addSaleLeadsInput = document.getElementById('add-sale-leads');
+            btnSaveSale = document.getElementById('btn-save-sale');
+
+            // Page: Edit Target
+            editTargetCurrent = document.getElementById('edit-target-current');
+            editTargetInput = document.getElementById('edit-target-input');
+            btnSaveTarget = document.getElementById('btn-save-target');
+            
+            // Page: Menu
+            btnResetData = document.getElementById('btn-reset-data');
+            // --- End of variable assignment ---
+
+            
             // --- Attach Listeners for Page Navigation ---
             attachNavButtonListeners();
-            // The menu button is not dynamic, so we add it here
-            document.getElementById('btn-open-menu').addEventListener('click', () => navShowPage('page-menu'));
+            btnOpenMenu.addEventListener('click', () => navShowPage('page-menu'));
 
             // --- Attach Listeners for Actions ---
             btnRefresh.addEventListener('click', loadData);
