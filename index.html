@@ -1,915 +1,135 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Sales Dashboard</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#3B82F6", // Main blue color
-                        "background-dark": "#1E293B", // Dark slate background
-                        "card-dark": "#334155", // Lighter slate for cards
-                        "card-border": "#475569", // Slate border
-                        "text-primary-dark": "#F8FAFC", // Brightest text (off-white)
-                        "text-secondary-dark": "#94A3B8", // Muted slate text
-                        "danger": "#EF4444", // Red for delete
-                        "danger-light": "#334155" // Card color for delete bg
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalesFlow Pro | Smart Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <!-- Library for Image Output -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            background-color: #1E293B; /* Dark slate background */
-            font-family: 'Manrope', "Noto Sans", sans-serif;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .progress-circle-anim {
-            transition: stroke-dashoffset 1s ease-out;
+        .light-mode .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        .page {
-            display: none; /* All pages are hidden by default */
-        }
-        .material-symbols-outlined {
-            font-variation-settings:
-            'FILL' 0,
-            'wght' 400,
-            'GRAD' 0,
-            'opsz' 24
+        .tab-active { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .gradient-text { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Report specific styles */
+        #report-capture {
+            width: 800px;
+            padding: 40px;
+            background: #0f172a;
+            position: absolute;
+            left: -9999px; /* Hide from screen but keep in DOM for capture */
         }
     </style>
 </head>
+<body class="bg-[#0a0a0c] text-white transition-colors duration-500">
+    <div id="root"></div>
 
-<body class="bg-background-dark font-display">
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+        const { AreaChart, Area, ResponsiveContainer, Tooltip } = Recharts;
 
-    <div id="page-login" class="page">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div class="flex w-12 items-center justify-start"></div>
-            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Login</h2>
-            <div class="flex w-12 items-center justify-end"></div>
-        </div>
-        
-        <div class="flex max-w-full flex-col gap-4 px-4 py-3 mt-8">
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Username (Email)</p>
-                <input id="login-username" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your email" type="email" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
-                <input id="login-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your password" type="password" value="" />
-            </label>
-        </div>
-        
-        <div class="px-4 py-4 mt-4">
-            <button id="btn-login" onclick="handleLogin()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
-                Login
-            </button>
-        </div>
-
-        <div class="text-center px-4 py-2">
-            <p class="text-text-secondary-dark text-sm">
-                Don't have an account? 
-                <span class="text-primary font-medium cursor-pointer" onclick="navShowPage('page-signup')">
-                    Sign Up
-                </span>
-            </p>
-        </div>
-    </div>
-
-    <div id="page-signup" class="page">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div class="flex w-12 items-center justify-start"></div>
-            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Create Account</h2>
-            <div class="flex w-12 items-center justify-end"></div>
-        </div>
-        
-        <div class="flex max-w-full flex-col gap-4 px-4 py-3 mt-4">
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Name</p>
-                <input id="signup-name" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your full name" type="text" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Location</p>
-                <input id="signup-location" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="e.g., Colombo, Sri Lanka" type="text" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Email</p>
-                <input id="signup-email" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter your email" type="email" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Password</p>
-                <input id="signup-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Create a strong password" type="password" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Confirm Password</p>
-                <input id="signup-confirm-password" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Confirm your password" type="password" value="" />
-            </label>
-        </div>
-        
-        <div class="px-4 py-4 mt-4">
-            <button id="btn-signup" onclick="handleSignUp()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
-                Sign Up
-            </button>
-        </div>
-
-        <div class="text-center px-4 py-2 mb-4">
-            <p class="text-text-secondary-dark text-sm">
-                Already have an account? 
-                <span class="text-primary font-medium cursor-pointer" onclick="navShowPage('page-login')">
-                    Login
-                </span>
-            </p>
-        </div>
-    </div>
-
-
-    <div id="page-dashboard" class="page"> <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div id="btn-open-menu" onclick="navShowPage('page-menu')" class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
-                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">menu</span>
-            </div>
-            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Sales Dashboard</h2>
-            <div class="flex w-12 items-center justify-end">
-                <button id="btn-refresh" onclick="loadData()" class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-text-primary-dark gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
-                    <span class="material-symbols-outlined" style="font-size: 24px;">refresh</span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="p-4 @container">
-            <div class="flex flex-col items-center justify-start rounded-xl shadow-[0_0_10px_rgba(59,130,246,0.1)] bg-gradient-to-br from-card-dark to-background-dark p-6">
-                
-                <div class="relative flex items-center justify-center w-48 h-48 mb-4">
-                    <svg class="w-full h-full transform -rotate-90">
-                        <circle class="text-card-border" cx="96" cy="96" fill="transparent" r="45" stroke="currentColor" stroke-width="10"></circle>
-                        <circle id="progress-circle" class="progress-circle-anim text-primary" cx="96" cy="96" fill="transparent" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" stroke-width="10"></circle>
-                    </svg>
-                    <div class="absolute flex flex-col items-center">
-                        <span id="progress-percent" class="text-text-primary-dark text-4xl font-bold">0%</span>
-                        <span class="text-text-secondary-dark text-sm">Achieved</span>
-                    </div>
-                </div>
-                
-                <div class="text-center">
-                    <p class="text-text-secondary-dark text-base font-normal leading-normal">Monthly Target</p>
-                    <p id="progress-target" class="text-text-primary-dark text-3xl font-bold leading-tight tracking-[-0.015em]">0 LKR</p>
-                </div>
-                
-                <div class="w-full mt-6 grid grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <p id="progress-sales-total" class="text-text-primary-dark text-lg font-bold">0</p>
-                        <p class="text-text-secondary-dark text-sm font-normal">Total Sales</p>
-                    </div>
-                    <div class="text-center">
-                        <p id="progress-remaining" class="text-text-primary-dark text-lg font-bold">0</p>
-                        <p class="text-text-secondary-dark text-sm font-normal">Remaining</p>
-                    </div>
-                    <div class="text-center">
-                        <p id="progress-devices-total" class="text-text-primary-dark text-lg font-bold">0</p>
-                        <p class="text-text-secondary-dark text-sm font-normal">Total Devices</p>
-                    </div>
-                    <div class="text-center">
-                        <p id="progress-leads-total" class="text-text-primary-dark text-lg font-bold">0</p>
-                        <p class="text-text-secondary-dark text-sm font-normal">Total Leads</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="px-4">
-            <h3 class="text-text-primary-dark text-lg font-bold mb-2">Daily Sales</h3>
-        </div>
-        <div class="flex overflow-x-auto [-ms-scrollbar-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-4">
-            <div id="daily-sales-container" class="flex items-stretch px-4 gap-3">
-                </div>
-        </div>
-        
-        <div class="px-4 mt-2">
-            <h3 class="text-text-primary-dark text-lg font-bold mb-2">Milestones</h3>
-        </div>
-        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md">
-                <div class="flex flex-col gap-1">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">To 50%</p>
-                    <p id="milestone-50" class="text-text-secondary-dark text-sm font-normal leading-normal">Sales needed: 0 LKR</p>
-                </div>
-            </div>
-            <div class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md">
-                <div class="flex flex-col gap-1">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">To 70%</p>
-                    <p id="milestone-70" class="text-text-secondary-dark text-sm font-normal leading-normal">Sales needed: 0 LKR</p>
-                </div>
-            </div>
-        </div>
-        <div class="h-5 bg-background-dark"></div>
-    </div>
-
-
-    <div id="page-menu" class="page">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div class="flex size-12 shrink-0 items-center justify-start cursor-pointer">
-                <button class="nav-button text-text-primary-dark" data-page="page-dashboard">
-                    <span class="material-symbols-outlined" style="font-size: 24px;">close</span>
-                </button>
-            </div>
-            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Menu</h2>
-            <div class="flex w-12 items-center justify-end"></div>
-        </div>
-
-        <div class="p-4 flex flex-col gap-4">
-            <button data-page="page-edit-target" class="nav-button flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
-                <div class="flex flex-col gap-1 text-left">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">Edit Monthly Target</p>
-                    <p class="text-text-secondary-dark text-sm font-normal leading-normal">Set your sales goal for the month.</p>
-                </div>
-                <span class="material-symbols-outlined text-text-secondary-dark">edit</span>
-            </button>
+        const App = () => {
+            const [isDark, setIsDark] = useState(true);
+            const [activeTab, setActiveTab] = useState('SFP');
+            const [showAdmin, setShowAdmin] = useState(false);
             
-            <button data-page="page-about" class="nav-button flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
-                <div class="flex flex-col gap-1 text-left">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">About</p>
-                    <p class="text-text-secondary-dark text-sm font-normal leading-normal">View developer information.</p>
-                </div>
-                <span class="material-symbols-outlined text-text-secondary-dark">info</span>
-            </button>
-
-            <button id="btn-logout" onclick="handleLogout()" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
-                <div class="flex flex-col gap-1 text-left">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">Logout</p>
-                    <p class="text-text-secondary-dark text-sm font-normal leading-normal">End your current session.</p>
-                </div>
-                <span class="material-symbols-outlined text-text-secondary-dark">logout</span>
-            </button>
-
-            <button id="btn-reset-data" onclick="resetData()" class="flex items-center justify-between gap-4 rounded-lg bg-card-dark p-4 shadow-md w-full">
-                <div class="flex flex-col gap-1 text-left">
-                    <p class="text-text-primary-dark text-base font-bold leading-tight">Reset Data</p>
-                    <p class="text-text-secondary-dark text-sm font-normal leading-normal">Clear all data for a new month.</p>
-                </div>
-                <span class="material-symbols-outlined text-danger">delete</span>
-            </button>
-        </div>
-    </div>
-
-
-    <div id="page-add-sale" class="page">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <div class="flex size-12 shrink-0 items-center justify-start">
-                <button class="nav-button text-text-primary-dark" data-page="page-dashboard">
-                    <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
-                </button>
-            </div>
-            <h2 id="add-sale-header" class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Add Daily Sale</h2>
-            <div class="flex w-12 items-center justify-end"></div>
-        </div>
-
-        <div class="flex max-w-full flex-col gap-4 px-4 py-3">
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Number of Devices</p>
-                <input id="add-sale-devices" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter number of devices" type="number" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">Total Revenue (LKR)</p>
-                <input id="add-sale-revenue" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter total revenue" type="number" value="" />
-            </label>
-            <label class="flex flex-col flex-1">
-                <p class="text-text-primary-dark text-base font-medium leading-normal pb-2">New Leads</p>
-                <input id="add-sale-leads" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-dark focus:outline-0 focus:ring-0 border-2 border-card-border bg-card-dark focus:border-primary h-14 placeholder:text-text-secondary-dark p-4 text-base font-normal leading-normal" placeholder="Enter new leads" type="number" value="" />
-            </label>
-        </div>
-        
-        <div class="px-4 py-4 mt-4">
-            <button id="btn-save-sale" onclick="saveDailySale()" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center">
-                Add Sale
-            </button>
-        </div>
-
-        <div id="delete-sale-section" class="px-4 py-2" style="display: none;">
-            <button id="btn-delete-sale" onclick="deleteSale()" class="w-full bg-danger-light text-danger font-bold py-3 px-4 rounded-lg hover:bg-danger hover:text-white focus:outline-none">
-                Delete This Entry
-            </button>
-        </div>
-    </div>
-
-
-    <div id="page-edit-target" class="page">
-        <header class="flex items-center justify-between bg-card-dark p-4 pb-2">
-            <button class="nav-button flex size-12 shrink-0 items-center justify-start text-text-primary-dark" data-page="page-menu">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-            <h1 class="flex-1 text-center text-lg font-bold text-text-primary-dark">Edit Monthly Target</h1>
-            <div class="w-12"></div>
-        </header>
-
-        <main class="flex-1 p-4">
-            <section class="mb-8">
-                <div class="rounded-xl bg-card-dark p-6 shadow-md">
-                    <p class="text-base text-text-secondary-dark">Current Monthly Target:</p>
-                    <p id="edit-target-current" class="text-4xl font-bold text-text-primary-dark mt-2">0 LKR</p>
-                </div>
-            </section>
-            <p class="text-text-secondary-dark pb-3 pt-1">Enter your new monthly sales goal.</p>
-            <div class="flex max-w-full flex-col gap-4">
-                <label class="flex flex-col">
-                    <p class="pb-2 text-base font-medium text-text-primary-dark">New Monthly Target (LKR):</p>
-                    <div class="relative">
-                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-text-secondary-dark">LKR</span>
-                        <input id="edit-target-input" class="form-input flex w-full resize-none overflow-hidden rounded-lg border border-card-border bg-card-dark h-14 pl-12 p-4 text-base font-normal text-text-primary-dark placeholder:text-text-secondary-dark focus:border-primary focus:ring-primary" placeholder="660,000" type="number" />
-                    </div>
-                </label>
-            </div>
-        </main>
-        
-        <footer class="p-4">
-            <button id="btn-save-target" onclick="saveTarget()" class="w-full rounded-lg bg-primary py-4 text-center text-base font-bold text-background-dark">
-                Save Changes
-            </button>
-        </footer>
-    </div>
-
-
-    <div id="page-about" class="page">
-        <div class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
-            <button class="nav-button text-text-primary-dark flex size-12 shrink-0 items-center justify-center" data-page="page-menu">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </button>
-            <h2 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">About</h2>
-            <div class="w-12"></div>
-        </div>
-        
-        <div class="flex-grow flex flex-col items-center justify-center p-4">
-            <div class="w-full max-w-sm">
-                <div class="flex p-4 @container justify-center">
-                    <div class="flex w-full flex-col gap-4 items-center">
-                        <div class="flex gap-4 flex-col items-center">
-                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-2 border-card-border" data-alt="A professional headshot of Supun Dilshan" style='background-image: url("https://i.postimg.cc/7LKgb6Gb/94-77-002-0598-20251023-114232.jpg");'></div>
-                            <p class="text-text-primary-dark text-2xl font-bold leading-tight tracking-[-0.015em] text-center">Supun Dilshan</p>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-text-secondary-dark text-sm font-normal leading-normal pb-3 pt-1 px-4 text-center">App Developed By</p>
-                <div class="@container mt-6">
-                    <div class="gap-4 px-4 grid-cols-3 grid">
-                        <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
-                            <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">work</span>
-                            </div>
-                            <p class="text-text-primary-dark text-sm font-medium leading-normal">LinkedIn</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
-                            <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">code</span>
-                            </div>
-                            <p class="text-text-primary-dark text-sm font-medium leading-normal">GitHub</p>
-                        </div>
-                        <div class="flex flex-col items-center gap-2 py-2.5 text-center transition-transform hover:scale-105">
-                            <div class="rounded-full bg-card-dark p-3.5">
-                                <span class="material-symbols-outlined text-text-primary-dark" style="font-size: 24px;">public</span>
-                            </div>
-                            <p class="text-text-primary-dark text-sm font-medium leading-normal">Website</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
-            <p class="text-text-secondary-dark text-base font-normal leading-normal">© 2025 Sales Dashboard</p>
-        </footer>
-    </div>
-
-
-    <script>
-        // =========================================================================
-        // === 1. YOUR SUPABASE KEYS ARE NOW ADDED ===
-        // =========================================================================
-        
-        const SUPABASE_URL = 'https://nnttppvynntwouhbtcgl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udHRwcHZ5bm50d291aGJ0Y2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwNjMwMzQsImV4cCI6MjA3NjYzOTAzNH0.9kO8MfDLxOT1IOAJij7ydx6cGtqNsTCAl4NHWvtyR9M';
-
-        // =========================================================================
-        
-        // --- GLOBAL VARIABLES ---
-        let supabaseClient; // **FIXED**: Renamed this variable
-        let currentUser = null;
-        
-        let pages;
-        
-        // Login Page
-        let loginUsernameInput, loginPasswordInput;
-
-        // Sign Up Page
-        let signupNameInput, signupLocationInput, signupEmailInput, signupPasswordInput, signupConfirmPasswordInput; // **FIXED**: Added confirm password
-
-        // Dashboard Page
-        let progressCircle, progressPercent, progressTarget, progressSalesTotal;
-        let progressRemaining, progressDevicesTotal, progressLeadsTotal;
-        let dailySalesContainer, milestone50, milestone70;
-        
-        // Add/Edit Sale Page
-        let addSaleHeader, addSaleDevicesInput, addSaleRevenueInput, addSaleLeadsInput;
-        let btnSaveSale, deleteSaleSection;
-        let currentlyEditingSaleId = null; // Changed from index to ID
-        
-        // Edit Target Page
-        let editTargetCurrent, editTargetInput;
-        
-
-        // --- UTILITY FUNCTIONS ---
-        
-        const formatNumber = (num) => (num || 0).toLocaleString('en-US');
-        const formatLKR = (num) => `${formatNumber(num)} LKR`;
-        
-        function navShowPage(pageId) {
-            if (!pages) pages = document.querySelectorAll('.page');
-            pages.forEach(page => {
-                page.style.display = (page.id === pageId) ? 'block' : 'none';
+            const [data, setData] = useState(() => {
+                const saved = localStorage.getItem('sales_tracker_v3');
+                return saved ? JSON.parse(saved) : {
+                    SFP: { target: 100000, actual: 0, unit: 'LKR' },
+                    LESIPAY: { target: 50, actual: 0, unit: 'Units' },
+                    'ADD TO BILL': { target: 500, actual: 0, unit: 'LKR/Qty' },
+                    'ACCESSORY': { target: 200, actual: 0, unit: 'Qty' }
+                };
             });
-            window.scrollTo(0, 0);
-        }
 
-        // --- NEW: AUTHENTICATION FUNCTIONS (SUPABASE) ---
+            useEffect(() => {
+                localStorage.setItem('sales_tracker_v3', JSON.stringify(data));
+            }, [data]);
 
-        async function handleSignUp() {
-            try {
-                const name = signupNameInput.value;
-                const location = signupLocationInput.value;
-                const email = signupEmailInput.value;
-                const password = signupPasswordInput.value;
-                const confirmPassword = signupConfirmPasswordInput.value; // **FIXED**: Added confirm password
-
-                if (!name || !location || !email || !password || !confirmPassword) {
-                    alert("Please fill in all fields.");
-                    return;
-                }
-
-                // **FIXED**: Added password match check
-                if (password !== confirmPassword) {
-                    alert("Passwords do not match. Please try again.");
-                    return;
-                }
-
-                // Supabase handles checking for duplicate emails
-                const { data, error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        // We can store extra info (like name and location)
-                        data: { 
-                            full_name: name,
-                            location: location
-                        }
-                    }
+            const current = data[activeTab];
+            const getPercent = (act, tar) => Math.min(Math.round((act / tar) * 100) || 0, 100);
+            
+            const downloadReport = () => {
+                const element = document.getElementById('report-view');
+                html2canvas(element, { backgroundColor: isDark ? '#0a0a0c' : '#f8fafc' }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `Sales_Report_${new Date().toLocaleDateString()}.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.9);
+                    link.click();
                 });
+            };
 
-                if (error) throw error;
-
-                alert("Sign up successful! Please check your email to confirm your account.");
-                
-                // Clear fields
-                signupNameInput.value = '';
-                signupLocationInput.value = '';
-                signupEmailInput.value = '';
-                signupPasswordInput.value = '';
-                signupConfirmPasswordInput.value = ''; // **FIXED**: Clear confirm password
-                
-                navShowPage('page-login');
-                
-            } catch (error) {
-                console.error('Error signing up:', error.message);
-                alert('Error signing up: ' + error.message);
-            }
-        }
-
-        async function handleLogin() {
-            try {
-                const email = loginUsernameInput.value;
-                const password = loginPasswordInput.value;
-
-                if (!email || !password) {
-                    alert("Please enter both email and password.");
-                    return;
-                }
-
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password,
-                });
-
-                if (error) throw error;
-
-                // Login successful
-                currentUser = data.user;
-                loginUsernameInput.value = '';
-                loginPasswordInput.value = '';
-                
-                await loadData();
-                navShowPage('page-dashboard');
-                
-            } catch (error) {
-                console.error('Error logging in:', error.message);
-                alert('Error logging in: ' + error.message);
-            }
-        }
-
-        async function handleLogout() {
-            try {
-                const { error } = await supabaseClient.auth.signOut();
-                if (error) throw error;
-                
-                currentUser = null;
-                navShowPage('page-login');
-                
-            } catch (error) {
-                console.error('Error logging out:', error.message);
-                alert('Error logging out: ' + error.message);
-            }
-        }
-
-
-        // --- NEW: DATA & CALCULATION FUNCTIONS (SUPABASE) ---
-
-        async function getTarget() {
-            if (!currentUser) return 0; // Not logged in
-
-            try {
-                // Fetch the target for the current user
-                const { data, error } = await supabaseClient
-                    .from('targets')
-                    .select('monthly_target')
-                    .eq('user_id', currentUser.id)
-                    .single(); // We only expect one row
-                
-                if (error && error.code !== 'PGRST116') throw error; // PGRST116 = "no rows found"
-                if (!data) return 0;
-                
-                return data.monthly_target;
-                
-            } catch (error) {
-                console.error('Error fetching target:', error.message);
-                return 0;
-            }
-        }
-
-        async function getSalesList() {
-            if (!currentUser) return []; // Not logged in
-            
-            try {
-                // Fetch all sales for the current user, ordered by date
-                const { data, error } = await supabaseClient
-                    .from('sales')
-                    .select('*') // Get all columns
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: true });
-
-                if (error) throw error;
-                return data || [];
-                
-            } catch (error) {
-                console.error('Error fetching sales list:', error.message);
-                return [];
-            }
-        }
-
-        async function loadData() {
-            const target = await getTarget();
-            const salesList = await getSalesList();
-            
-            let totalSales = 0;
-            let totalDevices = 0;
-            let totalLeads = 0;
-            
-            for (const sale of salesList) {
-                totalSales += (sale.revenue || 0);
-                totalDevices += (sale.devices || 0);
-                totalLeads += (sale.leads || 0);
-            }
-
-            const percentage = (target > 0) ? (totalSales / target) * 100 : 0;
-            const remaining = target - totalSales;
-            const remaining50 = Math.max(0, (target * 0.5) - totalSales);
-            const remaining70 = Math.max(0, (target * 0.7) - totalSales);
-
-            const circleCircumference = 283;
-            const progressOffset = (percentage >= 100) ? 0 : circleCircumference - (circleCircumference * percentage) / 100;
-            progressCircle.style.strokeDashoffset = progressOffset;
-            progressPercent.textContent = `${percentage.toFixed(0)}%`;
-
-            progressTarget.textContent = formatLKR(target);
-            progressSalesTotal.textContent = formatNumber(totalSales);
-            progressRemaining.textContent = formatNumber(remaining);
-            progressDevicesTotal.textContent = formatNumber(totalDevices);
-            progressLeadsTotal.textContent = formatNumber(totalLeads);
-
-            milestone50.textContent = (remaining50 > 0) ? `Sales needed: ${formatLKR(remaining50)}` : "Achieved!";
-            milestone70.textContent = (remaining70 > 0) ? `Sales needed: ${formatLKR(remaining70)}` : "Achieved!";
-
-            renderDailySales(salesList);
-            editTargetCurrent.textContent = formatLKR(target);
-        }
-
-        function renderDailySales(salesList) {
-            let html = '';
-            
-            salesList.forEach((sale, index) => {
-                html += `
-                <div class="relative">
-                    <div class="flex h-full flex-1 flex-col gap-2 rounded-lg min-w-40 bg-card-dark p-4 shadow-md pr-10">
-                        <p class="text-text-primary-dark text-base font-medium leading-normal">Day ${index + 1}</p>
-                        <p class="text-primary text-xl font-bold">${formatLKR(sale.revenue)}</p>
-                        <p class="text-text-secondary-dark text-sm">${formatNumber(sale.devices)} devices, ${formatNumber(sale.leads)} leads</p>
+            return (
+                <div className={`min-h-screen ${isDark ? 'bg-[#0a0a0c] text-slate-200' : 'bg-gray-50 text-slate-800'} p-4 md:p-10`}>
+                    
+                    {/* Header */}
+                    <div className="max-w-7xl mx-auto flex justify-between items-center mb-10">
+                        <motion.h1 initial={{opacity:0}} animate={{opacity:1}} className="text-2xl font-black tracking-tighter">
+                            SALES<span className="gradient-text font-extrabold">FLOW</span>
+                        </motion.h1>
+                        <div className="flex gap-3">
+                            <button onClick={downloadReport} className="hidden md:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-indigo-500/20">
+                                📸 Download JPEG Report
+                            </button>
+                            <button onClick={() => setIsDark(!isDark)} className="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+                                {isDark ? '🌙' : '☀️'}
+                            </button>
+                        </div>
                     </div>
-                    <button class="btn-edit-sale absolute top-2 right-2 p-1 text-text-secondary-dark hover:text-white" data-id="${sale.id}" data-revenue="${sale.revenue}" data-devices="${sale.devices}" data-leads="${sale.leads}" onclick="handleEditSaleClick(event)">
-                        <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
-                    </button>
-                </div>
-                `;
-            });
 
-            html += `
-            <button class="nav-button-add flex h-full flex-1 flex-col items-center justify-center gap-2 rounded-lg min-w-40 bg-card-dark/50 p-4 border-2 border-dashed border-card-border" onclick="handleAddSaleClick()">
-                <span class="material-symbols-outlined text-text-secondary-dark" style="font-size: 32px;">add</span>
-                <p class="text-text-secondary-dark text-base font-medium leading-normal">Add Sale</p>
-            </button>
-            `;
+                    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Sidebar */}
+                        <div className="lg:col-span-3 space-y-3">
+                            {Object.keys(data).map((tab) => (
+                                <button 
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`w-full p-4 rounded-2xl flex items-center justify-between transition-all ${activeTab === tab ? 'tab-active text-white' : 'glass-card hover:bg-white/5 opacity-70'}`}
+                                >
+                                    <span className="font-bold text-sm">{tab}</span>
+                                    <span className="text-[10px] font-black">{getPercent(data[tab].actual, data[tab].target)}%</span>
+                                </button>
+                            ))}
+                            <button onClick={() => setShowAdmin(!showAdmin)} className="w-full p-4 mt-6 rounded-2xl border-2 border-dashed border-indigo-500/30 text-indigo-500 font-bold text-sm">
+                                {showAdmin ? 'Close Settings' : '⚙️ Admin Panel'}
+                            </button>
+                        </div>
 
-            dailySalesContainer.innerHTML = html;
-            attachNavButtonListeners();
-        }
-        
-        async function saveTarget() {
-            if (!currentUser) return alert("Error: Not logged in.");
-            
-            try {
-                const newTarget = parseFloat(editTargetInput.value) || 0;
-                
-                // 'upsert' means UPDATE if it exists, or INSERT if it doesn't.
-                // We use 'user_id' as the conflict check, since it's unique.
-                const { error } = await supabaseClient
-                    .from('targets')
-                    .upsert({ 
-                        user_id: currentUser.id, 
-                        monthly_target: newTarget 
-                    }, { onConflict: 'user_id' });
+                        {/* Dashboard Body */}
+                        <div className="lg:col-span-9 space-y-6">
+                            <AnimatePresence>
+                                {showAdmin && (
+                                    <motion.div initial={{height:0, opacity:0}} animate={{height:'auto', opacity:1}} exit={{height:0, opacity:0}} className="glass-card rounded-3xl p-6 overflow-hidden">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <input type="number" placeholder="Target" value={current.target} onChange={(e) => setData({...data, [activeTab]: {...current, target: Number(e.target.value)}})} className="bg-black/20 p-3 rounded-xl border border-white/10 outline-none" />
+                                            <input type="number" placeholder="Actual" value={current.actual} onChange={(e) => setData({...data, [activeTab]: {...current, actual: Number(e.target.value)}})} className="bg-black/20 p-3 rounded-xl border border-white/10 outline-none" />
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
-                if (error) throw error;
-                
-                editTargetInput.value = '';
-                await loadData();
-                navShowPage('page-menu');
-                
-            } catch (error) {
-                console.error('Error saving target:', error.message);
-                alert('Error saving target: ' + error.message);
-            }
-        }
-
-        function openEditPage(id, revenue, devices, leads) {
-            currentlyEditingSaleId = id; // Store the database ID
-
-            addSaleHeader.textContent = `Edit Sale Entry`;
-            btnSaveSale.textContent = 'Save Changes';
-            deleteSaleSection.style.display = 'block';
-
-            addSaleDevicesInput.value = devices;
-            addSaleRevenueInput.value = revenue;
-            addSaleLeadsInput.value = leads;
-
-            navShowPage('page-add-sale');
-        }
-
-        function resetAddSalePage() {
-            currentlyEditingSaleId = null; // Clear the ID
-            addSaleHeader.textContent = 'Add Daily Sale';
-            btnSaveSale.textContent = 'Add Sale';
-            deleteSaleSection.style.display = 'none';
-
-            addSaleRevenueInput.value = '';
-            addSaleDevicesInput.value = '';
-            addSaleLeadsInput.value = '';
-        }
-
-        async function saveDailySale() {
-            if (!currentUser) return alert("Error: Not logged in.");
-            
-            const newRevenue = parseFloat(addSaleRevenueInput.value) || 0;
-            const newDevices = parseFloat(addSaleDevicesInput.value) || 0;
-            const newLeads = parseFloat(addSaleLeadsInput.value) || 0;
-
-            try {
-                if (currentlyEditingSaleId) {
-                    // --- EDIT MODE ---
-                    const { error } = await supabaseClient
-                        .from('sales')
-                        .update({ 
-                            revenue: newRevenue, 
-                            devices: newDevices, 
-                            leads: newLeads 
-                        })
-                        .eq('id', currentlyEditingSaleId); // Find the sale by its ID
-
-                    if (error) throw error;
-                    
-                } else {
-                    // --- ADD MODE ---
-                    if (newRevenue === 0 && newDevices === 0 && newLeads === 0) {
-                        navShowPage('page-dashboard');
-                        return;
-                    }
-                    
-                    const { error } = await supabaseClient
-                        .from('sales')
-                        .insert({ 
-                            user_id: currentUser.id,
-                            revenue: newRevenue, 
-                            devices: newDevices, 
-                            leads: newLeads 
-                        });
-                        
-                    if (error) throw error;
-                }
-                
-                resetAddSalePage();
-                await loadData();
-                navShowPage('page-dashboard');
-                
-            } catch (error) {
-                console.error('Error saving sale:', error.message);
-                alert('Error saving sale: ' + error.message);
-            }
-        }
-
-        async function deleteSale() {
-            if (!currentlyEditingSaleId) return;
-            
-            if (confirm("Are you sure you want to delete this sales entry?")) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('sales')
-                        .delete()
-                        .eq('id', currentlyEditingSaleId);
-                    
-                    if (error) throw error;
-                    
-                    resetAddSalePage();
-                    await loadData();
-                    navShowPage('page-dashboard');
-                    
-                } catch (error) {
-                    console.error('Error deleting sale:', error.message);
-                    alert('Error deleting sale: ' + error.message);
-                }
-            }
-        }
-
-        async function resetData() {
-            if (!currentUser) return alert("Error: Not logged in.");
-            
-            if (confirm("Are you sure you want to delete ALL your sales data for this month?")) {
-                try {
-                    // Delete all sales associated with this user
-                    const { error: salesError } = await supabaseClient
-                        .from('sales')
-                        .delete()
-                        .eq('user_id', currentUser.id);
-                    if (salesError) throw salesError;
-
-                    // Reset the user's target to 0
-                    const { error: targetError } = await supabaseClient
-                        .from('targets')
-                        .update({ monthly_target: 0 })
-                        .eq('user_id', currentUser.id);
-                    if (targetError) throw targetError;
-
-                    await loadData();
-                    navShowPage('page-dashboard');
-                    
-                } catch (error) {
-                    console.error('Error resetting data:', error.message);
-                    alert('Error resetting data: ' + error.message);
-                }
-            }
-        }
-
-        // --- BUTTON CLICK HANDLERS (called from HTML) ---
-
-        function attachNavButtonListeners() {
-            const navButtons = document.querySelectorAll('.nav-button');
-            navButtons.forEach(button => {
-                button.removeEventListener('click', handleNavClick);
-                button.addEventListener('click', handleNavClick);
-            });
-        }
-        
-        function handleNavClick(event) {
-            const pageId = event.currentTarget.getAttribute('data-page');
-            if (pageId) {
-                navShowPage(pageId);
-            }
-        }
-
-        function handleAddSaleClick() {
-            resetAddSalePage();
-            navShowPage('page-add-sale');
-        }
-
-        function handleEditSaleClick(event) {
-            const button = event.currentTarget;
-            const id = button.getAttribute('data-id');
-            const revenue = button.getAttribute('data-revenue');
-            const devices = button.getAttribute('data-devices');
-            const leads = button.getAttribute('data-leads');
-            openEditPage(id, revenue, devices, leads);
-        }
-
-       
-        document.addEventListener('DOMContentLoaded', async () => {
-            
-            // --- Assign all element variables ---
-            pages = document.querySelectorAll('.page');
-            
-            // Login Page
-            loginUsernameInput = document.getElementById('login-username');
-            loginPasswordInput = document.getElementById('login-password');
-
-            // Sign Up Page
-            signupNameInput = document.getElementById('signup-name');
-            signupLocationInput = document.getElementById('signup-location');
-            signupEmailInput = document.getElementById('signup-email');
-            signupPasswordInput = document.getElementById('signup-password');
-            signupConfirmPasswordInput = document.getElementById('signup-confirm-password'); // **FIXED**: Assign variable
-            
-            // Dashboard Page
-            progressCircle = document.getElementById('progress-circle');
-            progressPercent = document.getElementById('progress-percent');
-            progressTarget = document.getElementById('progress-target');
-            progressSalesTotal = document.getElementById('progress-sales-total');
-            progressRemaining = document.getElementById('progress-remaining');
-            progressDevicesTotal = document.getElementById('progress-devices-total');
-            progressLeadsTotal = document.getElementById('progress-leads-total');
-            dailySalesContainer = document.getElementById('daily-sales-container');
-            milestone50 = document.getElementById('milestone-50');
-            milestone70 = document.getElementById('milestone-70');
-            
-            // Add/Edit Sale Page
-            addSaleHeader = document.getElementById('add-sale-header');
-            addSaleDevicesInput = document.getElementById('add-sale-devices');
-            addSaleRevenueInput = document.getElementById('add-sale-revenue');
-            addSaleLeadsInput = document.getElementById('add-sale-leads');
-            btnSaveSale = document.getElementById('btn-save-sale');
-            deleteSaleSection = document.getElementById('delete-sale-section');
-            
-            // Edit Target Page
-            editTargetCurrent = document.getElementById('edit-target-current');
-            editTargetInput = document.getElementById('edit-target-input');
-            
-            attachNavButtonListeners();
-
-            // --- APP STARTUP LOGIC (SUPABASE) ---
-            
-            // 1. Initialize Supabase
-            // **FIXED**: Correctly initialize the client
-            const { createClient } = supabase;
-            supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-            // 2. Check for an active session
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                
-                if (session) {
-                    // User is already logged in
-                    currentUser = session.user;
-                    await loadData();
-                    navShowPage('page-dashboard');
-                } else {
-                    // No user logged in
-                    navShowPage('page-login');
-                }
-            } catch (error) {
-                console.error('Error checking session:', error.message);
-                navShowPage('page-login');
-            }
-        });
-
-    </script>
-</body>
-</html>
+                            {/* Detailed View Card */}
+                            <motion.div key={activeTab} initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="glass-card rounded-[2.5rem] p-8 md:p-12 border-t-4 border-indigo-500">
+                                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                                    <div className="text-center md:text-left">
+                                        
